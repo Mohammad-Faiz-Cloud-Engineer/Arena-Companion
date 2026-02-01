@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Arena Companion",
+  "version": "1.0.0",
+  "description": "Professional Chrome Extension for seamless Arena.AI integration in your browser's side panel",
+  "icons": {
+    "16": "icons/png/icon16.png",
+    "32": "icons/png/icon32.png",
+    "48": "icons/png/icon48.png",
+    "128": "icons/png/icon128.png"
+  },
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://arena.ai/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://arena.ai/*"],
+      "js": ["content/content-script.js"],
+      "css": ["content/content-style.css"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "arena_headers_ruleset",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html",
+    "default_width": 500
+  },
+  "action": {
+    "default_title": "Open Arena Companion"
+  }
+}

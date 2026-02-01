@@ -1,0 +1,23 @@
+/**
+ * Content Styles - Arena Companion
+ * CSS-only approach to avoid breaking React app
+ */
+
+/* Hide the LMArena announcement banner */
+div.bg-surface-floating:has(p) {
+  display: none !important;
+}
+
+div[class*="bg-surface-floating"]:has(svg) {
+  display: none !important;
+}
+
+div.pointer-events-auto:has(a[href*="lmarena"]) {
+  display: none !important;
+}
+
+/* Additional targeting */
+div[class*="surface-floating"][class*="pointer-events"] {
+  display: none !important;
+}
+
