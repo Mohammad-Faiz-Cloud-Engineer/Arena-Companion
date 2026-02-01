@@ -2,6 +2,10 @@
 
 A production-grade Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in your browser's side panel with optimized performance and corporate-grade code quality.
 
+## Author
+
+**Mohammad Faiz** - Creator & Lead Developer
+
 ## Features
 
 - **Modern Side Panel API**: Utilizes Chrome's native `chrome.sidePanel` API
@@ -104,6 +108,10 @@ User details and preferences are stored using `chrome.storage.local` with:
 ## License
 
 MIT License - See LICENSE file for details
+
+## Author
+
+Created by **Mohammad Faiz**
 
 ## Support
 
