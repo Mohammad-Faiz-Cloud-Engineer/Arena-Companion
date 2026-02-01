@@ -75,6 +75,24 @@ A production-grade Chrome Extension for seamless [Arena.AI](https://arena.ai/) i
 3. Use the refresh button to reload the Arena AI interface
 4. The panel persists across tabs and windows
 
+### How to Login
+
+**Important:** Due to OAuth security restrictions, you cannot login directly within the extension's iframe.
+
+**Login Steps:**
+1. Open [https://arena.ai/](https://arena.ai/) in a regular browser tab
+2. Complete the login process (Google OAuth or other method)
+3. Once logged in on the website, return to the extension
+4. Click the **refresh button** in the side panel
+5. You will now be logged in within the extension
+
+**Why this approach?**
+- Google OAuth and most authentication providers block iframe embedding for security reasons
+- This is a standard security measure to prevent clickjacking attacks
+- Your login session is shared between the website and the extension once authenticated
+
+**Alternative:** You can also use the **Login button** in the side panel, which will open Arena.AI in a new tab for authentication, then automatically refresh the extension after you complete the login.
+
 ## Technical Details
 
 ### Header Stripping
