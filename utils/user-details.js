@@ -1,6 +1,7 @@
 /**
  * User Details Management Module
  * Handles user data with professional error handling and validation
+ * @author Mohammad Faiz
  */
 
 import { storage } from './storage.js';
@@ -19,11 +20,44 @@ const validateUserDetails = (details) => {
   
   const hasValidName = typeof details.name === 'string';
   const hasValidEmail = typeof details.email === 'string';
+  const hasValidLastActive = details.lastActive === null || typeof details.lastActive === 'string';
   
-  return hasValidName && hasValidEmail;
+  return hasValidName && hasValidEmail && hasValidLastActive;
+};
+
+/**
+ * Validates email format
+ * @param {string} email - Email address to validate
+ * @returns {boolean} Validation result
+ */
+const validateEmail = (email) => {
+  if (!email || typeof email !== 'string') return true; // Empty is valid
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 };
 
 export const userDetails = {
+  /**
+   * Initializes user details with default values
+   * @returns {Promise<void>}
+   */
+  async initialize() {
+    try {
+      const existing = await this.get();
+      
+      // Only initialize if no valid data exists
+      if (!existing.name && !existing.email) {
+        await storage.set({
+          [CONFIG.STORAGE_KEYS.USER_DETAILS]: CONFIG.DEFAULTS.USER_DETAILS
+        });
+        logger.info('User details initialized with defaults');
+      }
+    } catch (error) {
+      logger.error('Failed to initialize user details', error);
+      throw error;
+    }
+  },
+
   /**
    * Retrieves user details from storage
    * @returns {Promise<Object>} User details object
@@ -31,17 +65,17 @@ export const userDetails = {
   async get() {
     try {
       const result = await storage.get(CONFIG.STORAGE_KEYS.USER_DETAILS);
-      const details = result[CONFIG.STORAGE_KEYS.USER_DETAILS] || CONFIG.DEFAULTS.USER_DETAILS;
+      const details = result[CONFIG.STORAGE_KEYS.USER_DETAILS];
       
-      if (!validateUserDetails(details)) {
+      if (!details || !validateUserDetails(details)) {
         logger.warn('Invalid user details found, returning defaults');
-        return CONFIG.DEFAULTS.USER_DETAILS;
+        return { ...CONFIG.DEFAULTS.USER_DETAILS };
       }
       
       return details;
     } catch (error) {
       logger.error('Failed to get user details', error);
-      return CONFIG.DEFAULTS.USER_DETAILS;
+      return { ...CONFIG.DEFAULTS.USER_DETAILS };
     }
   },
 
@@ -56,8 +90,13 @@ export const userDetails = {
         throw new Error('Invalid user details format');
       }
       
+      if (details.email && !validateEmail(details.email)) {
+        throw new Error('Invalid email format');
+      }
+      
       const dataToSave = {
-        ...details,
+        name: details.name.trim(),
+        email: details.email.trim(),
         lastActive: new Date().toISOString()
       };
       
@@ -78,11 +117,14 @@ export const userDetails = {
    */
   async updateLastVisit() {
     try {
+      const timestamp = new Date().toISOString();
       await storage.set({
-        [CONFIG.STORAGE_KEYS.LAST_VISIT]: new Date().toISOString()
+        [CONFIG.STORAGE_KEYS.LAST_VISIT]: timestamp
       });
+      logger.info('Last visit updated');
     } catch (error) {
       logger.error('Failed to update last visit', error);
+      // Don't throw - this is non-critical
     }
   },
 

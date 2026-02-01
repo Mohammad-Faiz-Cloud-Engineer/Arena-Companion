@@ -23,5 +23,30 @@
       "urlFilter": "*://arena.ai/*",
       "resourceTypes": ["main_frame", "sub_frame"]
     }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "X-Frame-Options",
+          "operation": "remove"
+        },
+        {
+          "header": "Content-Security-Policy",
+          "operation": "remove"
+        },
+        {
+          "header": "Frame-Options",
+          "operation": "remove"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://*.arena.ai/*",
+      "resourceTypes": ["main_frame", "sub_frame"]
+    }
   }
 ]

@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src https://arena.ai; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src https://arena.ai https://*.arena.ai; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src https://arena.ai https://*.arena.ai;">
+  <meta name="description" content="Arena Companion - Professional Chrome Extension for Arena.AI">
   <title>Arena Companion</title>
   <link rel="stylesheet" href="styles/reset.css">
   <link rel="stylesheet" href="styles/sidepanel.css">
@@ -11,21 +12,24 @@
 <body>
   <div class="container">
     <div class="iframe-wrapper">
-      <button class="refresh-btn" id="refreshBtn" aria-label="Refresh Arena Companion" title="Refresh">
-        <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+      <button class="refresh-btn" id="refreshBtn" aria-label="Refresh Arena Companion" aria-describedby="refreshDescription" title="Refresh" type="button">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M13.65 2.35C12.2 0.9 10.21 0 8 0 3.58 0 0.01 3.58 0.01 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L9 7h7V0l-2.35 2.35z" fill="currentColor"/>
         </svg>
+        <span id="refreshDescription" class="sr-only">Click to reload Arena AI interface</span>
       </button>
       <iframe 
         id="arenaFrame" 
         src="https://arena.ai/" 
-        title="Arena Companion"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-        loading="eager">
+        title="Arena Companion - AI Chat Interface"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals"
+        allow="clipboard-read; clipboard-write"
+        loading="eager"
+        referrerpolicy="no-referrer-when-downgrade">
       </iframe>
-      <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <p class="loading-text">Loading Arena Companion...</p>
+      <div class="loading-overlay" id="loadingOverlay" role="status" aria-live="polite" aria-describedby="loadingDescription">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="loading-text" id="loadingDescription">Loading Arena Companion...</p>
       </div>
     </div>
   </div>

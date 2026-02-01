@@ -1,6 +1,7 @@
 /**
  * Storage Management Module
  * Professional wrapper for chrome.storage.local with error handling and data sanitization
+ * @author Mohammad Faiz
  */
 
 import { logger } from './logger.js';
@@ -12,11 +13,20 @@ import { ERROR_MESSAGES } from './constants.js';
  * @returns {*} Sanitized data
  */
 const sanitizeData = (data) => {
-  if (typeof data === 'string') {
-    return data.replace(/[<>]/g, '');
+  if (data === null || data === undefined) {
+    return data;
   }
   
-  if (typeof data === 'object' && data !== null) {
+  if (typeof data === 'string') {
+    // Remove potentially dangerous characters and limit length
+    return data.replace(/[<>'"&]/g, '').substring(0, 10000);
+  }
+  
+  if (typeof data === 'number' || typeof data === 'boolean') {
+    return data;
+  }
+  
+  if (typeof data === 'object') {
     const sanitized = Array.isArray(data) ? [] : {};
     for (const key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -30,27 +40,39 @@ const sanitizeData = (data) => {
 };
 
 /**
- * Validates data structure
+ * Validates data structure for storage
  * @param {*} data - Data to validate
  * @returns {boolean} Validation result
  */
 const validateData = (data) => {
+  if (data === null || data === undefined) {
+    return false;
+  }
+  
   try {
-    JSON.stringify(data);
+    const stringified = JSON.stringify(data);
+    // Check storage quota (Chrome has 10MB limit for local storage)
+    if (stringified.length > 5242880) { // 5MB limit for safety
+      logger.warn('Data exceeds recommended storage size');
+      return false;
+    }
     return true;
   } catch {
     return false;
   }
 };
 
-export const storage = {
+export const storage = Object.freeze({
   /**
    * Retrieves data from chrome.storage.local
    * @param {string|string[]} keys - Storage key(s) to retrieve
-   * @returns {Promise<*>} Retrieved data
+   * @returns {Promise<Object>} Retrieved data
    */
   async get(keys) {
     try {
+      if (!keys) {
+        throw new Error(ERROR_MESSAGES.KEYS_REQUIRED);
+      }
       const result = await chrome.storage.local.get(keys);
       logger.info('Storage read:', keys);
       return result;
@@ -67,6 +89,10 @@ export const storage = {
    */
   async set(items) {
     try {
+      if (!items || typeof items !== 'object' || Array.isArray(items)) {
+        throw new Error(ERROR_MESSAGES.INVALID_DATA);
+      }
+      
       if (!validateData(items)) {
         throw new Error(ERROR_MESSAGES.INVALID_DATA);
       }
@@ -87,6 +113,9 @@ export const storage = {
    */
   async remove(keys) {
     try {
+      if (!keys) {
+        throw new Error(ERROR_MESSAGES.KEYS_REQUIRED);
+      }
       await chrome.storage.local.remove(keys);
       logger.info('Storage remove:', keys);
     } catch (error) {
@@ -108,4 +137,4 @@ export const storage = {
       throw error;
     }
   }
-};
+});

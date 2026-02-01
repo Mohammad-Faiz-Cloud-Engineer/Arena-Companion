@@ -1,6 +1,7 @@
 /**
  * Side Panel Styles
  * Corporate-grade styling with CSS variables for maintainability
+ * @author Mohammad Faiz
  */
 
 :root {
@@ -31,6 +32,10 @@
   /* Layout */
   --border-radius: 8px;
   --transition-speed: 0.2s;
+  
+  /* Z-index layers */
+  --z-index-refresh-btn: 1000;
+  --z-index-loading: 999;
 }
 
 /* Dark mode support */
@@ -58,11 +63,12 @@ body {
   width: 100%;
 }
 
+/* Refresh Button */
 .refresh-btn {
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 1000;
+  z-index: var(--z-index-refresh-btn);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,9 +77,11 @@ body {
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
   transition: all var(--transition-speed) ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
 .refresh-btn:hover {
@@ -117,6 +125,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: var(--z-index-loading);
   background-color: var(--color-background);
   display: flex;
   flex-direction: column;
@@ -156,7 +165,9 @@ body {
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -167,4 +178,17 @@ body {
 button:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
