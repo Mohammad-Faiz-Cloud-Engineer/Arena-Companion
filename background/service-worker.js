@@ -20,7 +20,10 @@ const openSidePanel = async (windowId) => {
     }
     
     await chrome.sidePanel.open({ windowId });
-    await userDetails.updateLastVisit();
+    // Non-blocking user activity update
+    userDetails.updateLastVisit().catch(err => 
+      logger.debug('Failed to update last visit', err)
+    );
     logger.info('Side panel opened successfully');
   } catch (error) {
     logger.error(ERROR_MESSAGES.PANEL_OPEN, error);
@@ -55,6 +58,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     } else if (reason === chrome.runtime.OnInstalledReason.UPDATE) {
       const version = chrome.runtime.getManifest().version;
       logger.info(`Extension updated to version ${version}`);
+      // Perform any migration logic here if needed
     }
   } catch (error) {
     logger.error('Installation handler error', error);
@@ -66,7 +70,11 @@ chrome.runtime.onInstalled.addListener(async (details) => {
  */
 self.addEventListener('activate', (event) => {
   logger.info('Service worker activated');
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    clients.claim().then(() => {
+      logger.debug('Service worker claimed all clients');
+    })
+  );
 });
 
 /**
@@ -74,6 +82,7 @@ self.addEventListener('activate', (event) => {
  */
 self.addEventListener('error', (event) => {
   logger.error('Service worker error', event.error);
+  event.preventDefault(); // Prevent default error handling
 });
 
 /**
@@ -81,6 +90,34 @@ self.addEventListener('error', (event) => {
  */
 self.addEventListener('unhandledrejection', (event) => {
   logger.error('Unhandled promise rejection', event.reason);
+  event.preventDefault(); // Prevent default error handling
+});
+
+/**
+ * Handle messages from content scripts or popup
+ */
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  logger.debug('Message received', message);
+  
+  // Handle async responses properly
+  (async () => {
+    try {
+      if (message.type === 'GET_USER_DETAILS') {
+        const details = await userDetails.get();
+        sendResponse({ success: true, data: details });
+      } else if (message.type === 'SAVE_USER_DETAILS') {
+        await userDetails.save(message.data);
+        sendResponse({ success: true });
+      } else {
+        sendResponse({ success: false, error: 'Unknown message type' });
+      }
+    } catch (error) {
+      logger.error('Message handler error', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  })();
+  
+  return true; // Keep message channel open for async response
 });
 
 logger.info('Service worker initialized');

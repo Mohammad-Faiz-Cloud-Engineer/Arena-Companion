@@ -20,7 +20,18 @@ export const CONFIG = Object.freeze({
   }),
   TIMEOUTS: Object.freeze({
     LOADING_OVERLAY: 5000,
-    OVERLAY_TRANSITION: 200
+    OVERLAY_TRANSITION: 200,
+    DEBOUNCE_DELAY: 300
+  }),
+  STORAGE: Object.freeze({
+    MAX_SIZE_BYTES: 5242880, // 5MB safety limit
+    QUOTA_BYTES_PER_ITEM: 8192 // Chrome's QUOTA_BYTES_PER_ITEM
+  }),
+  VALIDATION: Object.freeze({
+    MAX_STRING_LENGTH: 10000,
+    EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    MAX_NAME_LENGTH: 255,
+    MAX_EMAIL_LENGTH: 320 // RFC 5321
   })
 });
 
@@ -32,5 +43,7 @@ export const ERROR_MESSAGES = Object.freeze({
   INVALID_EMAIL: 'Invalid email format',
   MISSING_DOM_ELEMENTS: 'Required DOM elements not found',
   INVALID_TAB: 'Invalid tab object received',
-  KEYS_REQUIRED: 'Keys parameter is required'
+  KEYS_REQUIRED: 'Keys parameter is required',
+  STORAGE_QUOTA_EXCEEDED: 'Storage quota exceeded',
+  INVALID_USER_DETAILS: 'Invalid user details format'
 });

@@ -5,7 +5,7 @@
  */
 
 import { storage } from './storage.js';
-import { CONFIG } from './constants.js';
+import { CONFIG, ERROR_MESSAGES } from './constants.js';
 import { logger } from './logger.js';
 
 /**
@@ -18,11 +18,24 @@ const validateUserDetails = (details) => {
     return false;
   }
   
-  const hasValidName = typeof details.name === 'string';
-  const hasValidEmail = typeof details.email === 'string';
-  const hasValidLastActive = details.lastActive === null || typeof details.lastActive === 'string';
+  const hasValidName = typeof details.name === 'string' && 
+                       details.name.length <= CONFIG.VALIDATION.MAX_NAME_LENGTH;
+  const hasValidEmail = typeof details.email === 'string' && 
+                        details.email.length <= CONFIG.VALIDATION.MAX_EMAIL_LENGTH;
+  const hasValidLastActive = details.lastActive === null || 
+                             (typeof details.lastActive === 'string' && isValidISODate(details.lastActive));
   
   return hasValidName && hasValidEmail && hasValidLastActive;
+};
+
+/**
+ * Validates ISO date string
+ * @param {string} dateString - Date string to validate
+ * @returns {boolean} Validation result
+ */
+const isValidISODate = (dateString) => {
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
 };
 
 /**
@@ -32,11 +45,24 @@ const validateUserDetails = (details) => {
  */
 const validateEmail = (email) => {
   if (!email || typeof email !== 'string') return true; // Empty is valid
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  return CONFIG.VALIDATION.EMAIL_REGEX.test(email);
 };
 
-export const userDetails = {
+/**
+ * Sanitizes user input
+ * @param {string} input - Input to sanitize
+ * @param {number} maxLength - Maximum allowed length
+ * @returns {string} Sanitized input
+ */
+const sanitizeInput = (input, maxLength) => {
+  if (typeof input !== 'string') return '';
+  return input
+    .trim()
+    .replace(/[<>'"&]/g, '')
+    .substring(0, maxLength);
+};
+
+export const userDetails = Object.freeze({
   /**
    * Initializes user details with default values
    * @returns {Promise<void>}
@@ -48,7 +74,7 @@ export const userDetails = {
       // Only initialize if no valid data exists
       if (!existing.name && !existing.email) {
         await storage.set({
-          [CONFIG.STORAGE_KEYS.USER_DETAILS]: CONFIG.DEFAULTS.USER_DETAILS
+          [CONFIG.STORAGE_KEYS.USER_DETAILS]: { ...CONFIG.DEFAULTS.USER_DETAILS }
         });
         logger.info('User details initialized with defaults');
       }
@@ -87,16 +113,16 @@ export const userDetails = {
   async save(details) {
     try {
       if (!validateUserDetails(details)) {
-        throw new Error('Invalid user details format');
+        throw new Error(ERROR_MESSAGES.INVALID_USER_DETAILS);
       }
       
       if (details.email && !validateEmail(details.email)) {
-        throw new Error('Invalid email format');
+        throw new Error(ERROR_MESSAGES.INVALID_EMAIL);
       }
       
       const dataToSave = {
-        name: details.name.trim(),
-        email: details.email.trim(),
+        name: sanitizeInput(details.name, CONFIG.VALIDATION.MAX_NAME_LENGTH),
+        email: sanitizeInput(details.email, CONFIG.VALIDATION.MAX_EMAIL_LENGTH),
         lastActive: new Date().toISOString()
       };
       
@@ -121,7 +147,7 @@ export const userDetails = {
       await storage.set({
         [CONFIG.STORAGE_KEYS.LAST_VISIT]: timestamp
       });
-      logger.info('Last visit updated');
+      logger.debug('Last visit updated');
     } catch (error) {
       logger.error('Failed to update last visit', error);
       // Don't throw - this is non-critical
@@ -140,5 +166,23 @@ export const userDetails = {
       logger.error('Failed to clear user details', error);
       throw error;
     }
+  },
+
+  /**
+   * Exports user details for backup
+   * @returns {Promise<Object>} User details with metadata
+   */
+  async export() {
+    try {
+      const details = await this.get();
+      return {
+        ...details,
+        exportedAt: new Date().toISOString(),
+        version: '1.0.0'
+      };
+    } catch (error) {
+      logger.error('Failed to export user details', error);
+      throw error;
+    }
   }
-};
+});

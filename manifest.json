@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Arena Companion",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Professional Chrome Extension for seamless Arena.AI integration in your browser's side panel",
   "author": "Mohammad Faiz",
   "icons": {
@@ -42,10 +42,10 @@
     "type": "module"
   },
   "side_panel": {
-    "default_path": "sidepanel/sidepanel.html",
-    "default_width": 500
+    "default_path": "sidepanel/sidepanel.html"
   },
   "action": {
     "default_title": "Open Arena Companion"
-  }
+  },
+  "minimum_chrome_version": "114"
 }

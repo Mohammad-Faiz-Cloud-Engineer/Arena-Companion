@@ -5,7 +5,7 @@
  */
 
 import { logger } from './logger.js';
-import { ERROR_MESSAGES } from './constants.js';
+import { CONFIG, ERROR_MESSAGES } from './constants.js';
 
 /**
  * Sanitizes input data to prevent XSS and injection attacks
@@ -19,7 +19,9 @@ const sanitizeData = (data) => {
   
   if (typeof data === 'string') {
     // Remove potentially dangerous characters and limit length
-    return data.replace(/[<>'"&]/g, '').substring(0, 10000);
+    return data
+      .replace(/[<>'"&]/g, '')
+      .substring(0, CONFIG.VALIDATION.MAX_STRING_LENGTH);
   }
   
   if (typeof data === 'number' || typeof data === 'boolean') {
@@ -51,14 +53,33 @@ const validateData = (data) => {
   
   try {
     const stringified = JSON.stringify(data);
-    // Check storage quota (Chrome has 10MB limit for local storage)
-    if (stringified.length > 5242880) { // 5MB limit for safety
+    if (stringified.length > CONFIG.STORAGE.MAX_SIZE_BYTES) {
       logger.warn('Data exceeds recommended storage size');
       return false;
     }
     return true;
   } catch {
     return false;
+  }
+};
+
+/**
+ * Checks available storage quota
+ * @returns {Promise<{usage: number, quota: number}>} Storage usage info
+ */
+const checkStorageQuota = async () => {
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const estimate = await navigator.storage.estimate();
+      return {
+        usage: estimate.usage || 0,
+        quota: estimate.quota || 0
+      };
+    }
+    return { usage: 0, quota: 0 };
+  } catch (error) {
+    logger.debug('Storage quota check failed', error);
+    return { usage: 0, quota: 0 };
   }
 };
 
@@ -74,7 +95,7 @@ export const storage = Object.freeze({
         throw new Error(ERROR_MESSAGES.KEYS_REQUIRED);
       }
       const result = await chrome.storage.local.get(keys);
-      logger.info('Storage read:', keys);
+      logger.debug('Storage read:', keys);
       return result;
     } catch (error) {
       logger.error(ERROR_MESSAGES.STORAGE_READ, error);
@@ -99,8 +120,12 @@ export const storage = Object.freeze({
       
       const sanitizedItems = sanitizeData(items);
       await chrome.storage.local.set(sanitizedItems);
-      logger.info('Storage write:', Object.keys(sanitizedItems));
+      logger.debug('Storage write:', Object.keys(sanitizedItems));
     } catch (error) {
+      if (error.message && error.message.includes('QUOTA_BYTES')) {
+        logger.error(ERROR_MESSAGES.STORAGE_QUOTA_EXCEEDED, error);
+        throw new Error(ERROR_MESSAGES.STORAGE_QUOTA_EXCEEDED);
+      }
       logger.error(ERROR_MESSAGES.STORAGE_WRITE, error);
       throw new Error(ERROR_MESSAGES.STORAGE_WRITE);
     }
@@ -117,7 +142,7 @@ export const storage = Object.freeze({
         throw new Error(ERROR_MESSAGES.KEYS_REQUIRED);
       }
       await chrome.storage.local.remove(keys);
-      logger.info('Storage remove:', keys);
+      logger.debug('Storage remove:', keys);
     } catch (error) {
       logger.error('Failed to remove from storage', error);
       throw error;
@@ -136,5 +161,13 @@ export const storage = Object.freeze({
       logger.error('Failed to clear storage', error);
       throw error;
     }
+  },
+
+  /**
+   * Gets storage usage statistics
+   * @returns {Promise<{usage: number, quota: number}>} Storage usage info
+   */
+  async getUsage() {
+    return checkStorageQuota();
   }
 });

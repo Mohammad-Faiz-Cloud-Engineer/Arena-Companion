@@ -6,12 +6,13 @@
 
 import { logger } from '../../utils/logger.js';
 import { userDetails } from '../../utils/user-details.js';
-import { CONFIG } from '../../utils/constants.js';
+import { CONFIG, ERROR_MESSAGES } from '../../utils/constants.js';
 
 // DOM Elements - Cached for performance
 let arenaFrame = null;
 let loadingOverlay = null;
 let refreshBtn = null;
+let loadTimeout = null;
 
 /**
  * Initializes DOM element references
@@ -23,7 +24,7 @@ const initializeDOMReferences = () => {
   refreshBtn = document.getElementById('refreshBtn');
   
   if (!arenaFrame || !loadingOverlay || !refreshBtn) {
-    throw new Error(CONFIG.ERROR_MESSAGES.MISSING_DOM_ELEMENTS);
+    throw new Error(ERROR_MESSAGES.MISSING_DOM_ELEMENTS);
   }
 };
 
@@ -32,6 +33,12 @@ const initializeDOMReferences = () => {
  */
 const hideLoadingOverlay = () => {
   if (!loadingOverlay) return;
+  
+  // Clear any existing timeout
+  if (loadTimeout) {
+    clearTimeout(loadTimeout);
+    loadTimeout = null;
+  }
   
   loadingOverlay.classList.add('hidden');
   setTimeout(() => {
@@ -54,9 +61,15 @@ const showLoadingOverlay = () => {
 };
 
 /**
- * Refreshes the Arena iframe
+ * Debounced refresh function to prevent rapid clicks
  */
+let refreshDebounceTimer = null;
 const refreshArenaFrame = () => {
+  if (refreshDebounceTimer) {
+    logger.debug('Refresh debounced');
+    return;
+  }
+  
   try {
     if (!arenaFrame) {
       logger.error('Arena frame not initialized');
@@ -66,6 +79,11 @@ const refreshArenaFrame = () => {
     showLoadingOverlay();
     arenaFrame.src = CONFIG.ARENA_URL;
     logger.info('Arena frame refreshed');
+    
+    // Debounce for 1 second
+    refreshDebounceTimer = setTimeout(() => {
+      refreshDebounceTimer = null;
+    }, 1000);
   } catch (error) {
     logger.error('Failed to refresh frame', error);
     hideLoadingOverlay();
@@ -78,6 +96,11 @@ const refreshArenaFrame = () => {
 const handleIframeLoad = () => {
   hideLoadingOverlay();
   logger.info('Arena Companion loaded successfully');
+  
+  // Update user activity in background
+  userDetails.updateLastVisit().catch(err => 
+    logger.debug('Failed to update last visit', err)
+  );
 };
 
 /**
@@ -95,32 +118,42 @@ const handleIframeError = (error) => {
 const initializeIframe = () => {
   if (!arenaFrame) return;
   
-  arenaFrame.addEventListener('load', handleIframeLoad);
-  arenaFrame.addEventListener('error', handleIframeError);
+  arenaFrame.addEventListener('load', handleIframeLoad, { once: false });
+  arenaFrame.addEventListener('error', handleIframeError, { once: false });
 
   // Timeout fallback for loading overlay
-  setTimeout(hideLoadingOverlay, CONFIG.TIMEOUTS.LOADING_OVERLAY);
+  loadTimeout = setTimeout(hideLoadingOverlay, CONFIG.TIMEOUTS.LOADING_OVERLAY);
 };
 
 /**
- * Initializes refresh button
+ * Initializes refresh button with keyboard support
  */
 const initializeRefreshButton = () => {
   if (!refreshBtn) return;
   
   refreshBtn.addEventListener('click', refreshArenaFrame, { passive: true });
+  
+  // Keyboard accessibility
+  refreshBtn.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      refreshArenaFrame();
+    }
+  }, { passive: false });
 };
 
 /**
- * Updates user activity timestamp
- * @returns {Promise<void>}
+ * Handles visibility change to optimize performance
  */
-const updateUserActivity = async () => {
-  try {
-    await userDetails.updateLastVisit();
-  } catch (error) {
-    logger.error('Failed to update user activity', error);
-    // Non-critical error, don't throw
+const handleVisibilityChange = () => {
+  if (document.hidden) {
+    logger.debug('Side panel hidden');
+  } else {
+    logger.debug('Side panel visible');
+    // Update user activity when panel becomes visible
+    userDetails.updateLastVisit().catch(err => 
+      logger.debug('Failed to update last visit', err)
+    );
   }
 };
 
@@ -135,6 +168,13 @@ const cleanup = () => {
   if (refreshBtn) {
     refreshBtn.removeEventListener('click', refreshArenaFrame);
   }
+  if (loadTimeout) {
+    clearTimeout(loadTimeout);
+  }
+  if (refreshDebounceTimer) {
+    clearTimeout(refreshDebounceTimer);
+  }
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
 };
 
 /**
@@ -148,7 +188,14 @@ const initialize = async () => {
     initializeDOMReferences();
     initializeIframe();
     initializeRefreshButton();
-    await updateUserActivity();
+    
+    // Listen for visibility changes
+    document.addEventListener('visibilitychange', handleVisibilityChange, { passive: true });
+    
+    // Initial user activity update (non-blocking)
+    userDetails.updateLastVisit().catch(err => 
+      logger.debug('Failed to update last visit', err)
+    );
     
     logger.info('Side panel initialized successfully');
   } catch (error) {

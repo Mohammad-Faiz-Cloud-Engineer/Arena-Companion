@@ -7,17 +7,19 @@
 (() => {
   'use strict';
   
+  const STYLE_ID = 'arena-companion-cleanup';
+  
   /**
    * Injects CSS to hide promotional banners
    */
   const injectHidingCSS = () => {
     // Check if already injected
-    if (document.getElementById('arena-companion-cleanup')) {
+    if (document.getElementById(STYLE_ID)) {
       return;
     }
     
     const style = document.createElement('style');
-    style.id = 'arena-companion-cleanup';
+    style.id = STYLE_ID;
     style.textContent = `
       /* Hide LMArena banner with high specificity */
       div.bg-surface-floating:has(p),
@@ -36,12 +38,39 @@
     }
   };
 
+  /**
+   * Observes DOM mutations to re-inject CSS if removed
+   */
+  const observeStyleRemoval = () => {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
+          for (const node of mutation.removedNodes) {
+            if (node.id === STYLE_ID) {
+              injectHidingCSS();
+              break;
+            }
+          }
+        }
+      }
+    });
+    
+    const head = document.head || document.documentElement;
+    if (head) {
+      observer.observe(head, { childList: true });
+    }
+  };
+
   // Inject CSS immediately
   if (document.readyState === 'loading') {
     injectHidingCSS();
-    document.addEventListener('DOMContentLoaded', injectHidingCSS, { once: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      injectHidingCSS();
+      observeStyleRemoval();
+    }, { once: true });
   } else {
     injectHidingCSS();
+    observeStyleRemoval();
   }
 })();
 
