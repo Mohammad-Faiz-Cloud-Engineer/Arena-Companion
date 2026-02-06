@@ -5,6 +5,23 @@ All notable changes to Arena Companion will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-06
+
+### Added
+- **Context Menu Feature**
+  - Right-click context menu to open Arena Companion
+  - Quick access from anywhere in the browser
+  - Works on all contexts (page, selection, link, etc.)
+  - Added `contextMenus` permission to manifest
+
+### Changed
+- **Service Worker**: Enhanced with context menu creation and click handler
+- **Manifest**: Updated to version 1.2.0 with contextMenus permission
+
+### Improved
+- User accessibility with multiple ways to open the side panel
+- Workflow efficiency with right-click quick access
+
 ## [1.1.0] - 2026-02-01
 
 ### 🎉 Major Performance & Security Update
