@@ -14,7 +14,8 @@
     "sidePanel",
     "storage",
     "declarativeNetRequest",
-    "contextMenus"
+    "contextMenus",
+    "downloads"
   ],
   "host_permissions": [
     "https://arena.ai/*",
