@@ -60,8 +60,30 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       logger.info(`Extension updated to version ${version}`);
       // Perform any migration logic here if needed
     }
+
+    // Create context menu
+    chrome.contextMenus.create({
+      id: 'openArenaCompanion',
+      title: 'Open Arena Companion',
+      contexts: ['all']
+    });
+    logger.info('Context menu created');
   } catch (error) {
     logger.error('Installation handler error', error);
+  }
+});
+
+/**
+ * Handle context menu clicks
+ */
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  try {
+    if (info.menuItemId === 'openArenaCompanion' && tab?.windowId) {
+      await openSidePanel(tab.windowId);
+      logger.info('Side panel opened via context menu');
+    }
+  } catch (error) {
+    logger.error('Context menu handler error', error);
   }
 });
 
