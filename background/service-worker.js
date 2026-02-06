@@ -130,6 +130,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else if (message.type === 'SAVE_USER_DETAILS') {
         await userDetails.save(message.data);
         sendResponse({ success: true });
+      } else if (message.type === 'DOWNLOAD_FILE') {
+        // Handle download requests from iframe
+        try {
+          const downloadId = await chrome.downloads.download({
+            url: message.url,
+            filename: message.filename || undefined,
+            saveAs: message.saveAs || false
+          });
+          logger.info('Download started', { downloadId, url: message.url });
+          sendResponse({ success: true, downloadId });
+        } catch (downloadError) {
+          logger.error('Download failed', downloadError);
+          sendResponse({ success: false, error: downloadError.message });
+        }
       } else {
         sendResponse({ success: false, error: 'Unknown message type' });
       }
