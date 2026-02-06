@@ -13,7 +13,8 @@
   "permissions": [
     "sidePanel",
     "storage",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://arena.ai/*",
