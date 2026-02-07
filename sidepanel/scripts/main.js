@@ -1,21 +1,14 @@
 /**
  * Side Panel Main Script
  * Handles iframe loading, refresh functionality, user interactions, and prompt forwarding
+ * @module main
  * @author Mohammad Faiz
- * @version 1.3.0
+ * @version 1.3.1
  */
 
 import { logger } from '../../utils/logger.js';
 import { userDetails } from '../../utils/user-details.js';
 import { CONFIG, ERROR_MESSAGES, ACTION_STORAGE_KEYS } from '../../utils/constants.js';
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const STORAGE_KEY = ACTION_STORAGE_KEYS?.PENDING_ACTION || 'arena_companion_pending_action';
-const ACTION_EXPIRY_MS = CONFIG?.TIMEOUTS?.ACTION_EXPIRY || 30000;
-const POLL_INTERVAL = CONFIG?.TIMEOUTS?.STORAGE_POLL_INTERVAL || 500;
 
 // ============================================================================
 // DOM REFERENCES
@@ -26,7 +19,6 @@ let loadingOverlay = null;
 let refreshBtn = null;
 let loadTimeout = null;
 let refreshDebounceTimer = null;
-let pollInterval = null;
 
 // Track processed actions to prevent duplicates
 const processedActionIds = new Set();
@@ -122,9 +114,6 @@ const handleIframeLoad = () => {
   hideLoadingOverlay();
   logger.info('Arena Companion loaded successfully');
 
-  // Check for pending actions after iframe loads
-  checkPendingActions();
-
   userDetails.updateLastVisit().catch((err) =>
     logger.debug('Failed to update last visit', err)
   );
@@ -159,6 +148,7 @@ const initializeIframe = () => {
  * Forwards a prompt to the Arena.AI iframe
  * @param {string} prompt - Prompt to forward
  * @param {string} actionId - Action ID for tracking
+ * @returns {boolean} Success status
  */
 const forwardToIframe = (prompt, actionId) => {
   if (!arenaFrame || !arenaFrame.contentWindow) {
@@ -167,7 +157,6 @@ const forwardToIframe = (prompt, actionId) => {
   }
 
   try {
-    // Post message to iframe
     arenaFrame.contentWindow.postMessage(
       {
         type: 'ARENA_COMPANION_INJECT_PROMPT',
@@ -184,19 +173,6 @@ const forwardToIframe = (prompt, actionId) => {
     logger.error('Failed to forward prompt to iframe', error);
     return false;
   }
-};
-
-/**
- * Checks for pending actions in storage
- */
-/**
- * Checks for pending actions in storage
- * @deprecated Content script now handles this directly to prevent race conditions
- */
-const checkPendingActions = async () => {
-  // Logic removed to prevent race condition with content script
-  // The content script inside the iframe handles storage polling directly
-  return;
 };
 
 // ============================================================================
@@ -262,9 +238,6 @@ const handleVisibilityChange = () => {
   } else {
     logger.debug('Side panel visible');
 
-    // Check for pending actions when panel becomes visible
-    checkPendingActions();
-
     userDetails.updateLastVisit().catch((err) =>
       logger.debug('Failed to update last visit', err)
     );
@@ -292,9 +265,6 @@ const cleanup = () => {
   if (refreshDebounceTimer) {
     clearTimeout(refreshDebounceTimer);
   }
-  if (pollInterval) {
-    clearInterval(pollInterval);
-  }
   document.removeEventListener('visibilitychange', handleVisibilityChange);
   chrome.runtime.onMessage.removeListener(handleMessage);
 };
@@ -309,7 +279,7 @@ const cleanup = () => {
  */
 const initialize = async () => {
   try {
-    logger.info('Initializing side panel v1.3.0');
+    logger.info('Initializing side panel v1.3.1');
 
     initializeDOMReferences();
     initializeIframe();
@@ -322,12 +292,6 @@ const initialize = async () => {
     document.addEventListener('visibilitychange', handleVisibilityChange, {
       passive: true
     });
-
-    // Start polling for pending actions
-    pollInterval = setInterval(checkPendingActions, POLL_INTERVAL);
-
-    // Initial check
-    checkPendingActions();
 
     // Initial user activity update
     userDetails.updateLastVisit().catch((err) =>
@@ -352,8 +316,11 @@ window.addEventListener('beforeunload', cleanup, { once: true });
 
 // Clean up processed action IDs periodically to prevent memory leaks
 setInterval(() => {
-  if (processedActionIds.size > 100) {
-    const idsToKeep = Array.from(processedActionIds).slice(-50);
+  const MAX_IDS = 100;
+  const KEEP_IDS = 50;
+  
+  if (processedActionIds.size > MAX_IDS) {
+    const idsToKeep = Array.from(processedActionIds).slice(-KEEP_IDS);
     processedActionIds.clear();
     idsToKeep.forEach((id) => processedActionIds.add(id));
     logger.debug('Cleaned up processed action IDs');

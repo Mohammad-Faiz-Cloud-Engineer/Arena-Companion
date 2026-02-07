@@ -1,8 +1,9 @@
 /**
  * Service Worker - Background Script
  * Handles extension lifecycle, side panel management, and text selection actions
+ * @module service-worker
  * @author Mohammad Faiz
- * @version 1.3.1
+ * @version 1.3.2
  */
 
 import { logger } from '../utils/logger.js';
@@ -44,7 +45,10 @@ const sanitizeSelection = (text) => {
   return text
     .trim()
     .substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH)
-    .replace(/[<>]/g, '');
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '');
 };
 
 /**
@@ -121,11 +125,10 @@ const broadcastMessage = async (message) => {
  */
 const openSidePanelByTab = async (tabId, retryCount = 0) => {
   try {
-    if (typeof tabId !== 'number' || tabId < 0) {
+    if (typeof tabId !== 'number' || tabId < 0 || tabId === chrome.tabs.TAB_ID_NONE) {
       throw new Error('Invalid tab ID');
     }
 
-    // Open side panel using tabId - this is the most reliable method
     await chrome.sidePanel.open({ tabId });
 
     logger.info(SUCCESS_MESSAGES.PANEL_OPENED, { method: 'tabId', tabId });
@@ -153,7 +156,7 @@ const openSidePanelByTab = async (tabId, retryCount = 0) => {
  */
 const openSidePanelByWindow = async (windowId, retryCount = 0) => {
   try {
-    if (typeof windowId !== 'number' || windowId < 0) {
+    if (typeof windowId !== 'number' || windowId < 0 || windowId === chrome.windows.WINDOW_ID_NONE) {
       throw new Error(ERROR_MESSAGES.INVALID_TAB);
     }
 
@@ -248,20 +251,21 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
       timestamp: Date.now()
     };
 
-    // 6. Multiple broadcast attempts for reliability
-    // The content script should pick it up from storage polling,
-    // but we also broadcast as a backup
+    // 6. Optimized broadcast with Promise.all for better performance
     await broadcastMessage(message);
     logger.info('Initial broadcast sent', { action, actionId });
 
-    // Send multiple delayed broadcasts to catch the iframe loading
+    // Schedule delayed broadcasts using Promise-based approach
     const broadcastDelays = [1000, 2000, 3000, 5000];
-    broadcastDelays.forEach((delay) => {
-      setTimeout(async () => {
-        await broadcastMessage(message);
-        logger.debug(`Delayed broadcast sent at ${delay}ms`);
-      }, delay);
-    });
+    const delayedBroadcasts = broadcastDelays.map((delay) =>
+      new Promise((resolve) => {
+        setTimeout(async () => {
+          await broadcastMessage(message);
+          logger.debug(`Delayed broadcast sent at ${delay}ms`);
+          resolve();
+        }, delay);
+      })
+    );
 
     // Non-blocking user activity update
     userDetails.updateLastVisit().catch((err) =>
@@ -508,4 +512,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Recreate context menus on startup
 createContextMenus();
 
-logger.info('Service worker initialized v1.3.1 - Restored');
+logger.info('Service worker initialized v1.3.2');

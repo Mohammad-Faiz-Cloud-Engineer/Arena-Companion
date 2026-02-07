@@ -1,9 +1,9 @@
 # Arena Companion
 
-**Version:** 1.1.0  
+**Version:** 1.3.1  
 **Status:** Production Ready ✅
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Mohammad-Faiz-Cloud-Engineer/arena-companion/releases)
+[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)](https://github.com/Mohammad-Faiz-Cloud-Engineer/arena-companion/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Chrome](https://img.shields.io/badge/chrome-114%2B-brightgreen.svg)](https://www.google.com/chrome/)
 [![Manifest](https://img.shields.io/badge/manifest-v3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)

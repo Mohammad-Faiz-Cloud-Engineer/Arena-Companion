@@ -8,6 +8,23 @@
   <meta name="theme-color" content="#1a73e8">
   <meta name="color-scheme" content="light dark">
   <title>Arena Companion</title>
+  <style>
+    /* Critical CSS - Inline to prevent FOUC */
+    body { margin: 0; padding: 0; overflow: hidden; }
+    .container { height: 100vh; width: 100%; position: relative; }
+    .loading-overlay { 
+      position: absolute; 
+      inset: 0; 
+      background: #fff; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      z-index: 999;
+    }
+    @media (prefers-color-scheme: dark) {
+      .loading-overlay { background: #202124; }
+    }
+  </style>
   <link rel="stylesheet" href="styles/reset.css">
   <link rel="stylesheet" href="styles/sidepanel.css">
 </head>
@@ -24,7 +41,7 @@
         id="arenaFrame" 
         src="https://arena.ai/" 
         title="Arena Companion - AI Chat Interface"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals"
         allow="clipboard-read; clipboard-write"
         loading="eager"
         referrerpolicy="no-referrer-when-downgrade">

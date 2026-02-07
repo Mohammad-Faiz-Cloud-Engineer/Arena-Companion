@@ -1,8 +1,9 @@
 /**
  * Application Constants
  * Centralized configuration for Arena Companion
+ * @module constants
  * @author Mohammad Faiz
- * @version 1.3.0
+ * @version 1.3.1
  */
 
 /**
@@ -113,7 +114,8 @@ export const CONFIG = Object.freeze({
   VALIDATION: Object.freeze({
     MAX_STRING_LENGTH: 10000,
     MAX_SELECTION_LENGTH: 50000,
-    EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    // RFC 5322 compliant email regex (simplified but robust)
+    EMAIL_REGEX: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
     MAX_NAME_LENGTH: 255,
     MAX_EMAIL_LENGTH: 320
   })

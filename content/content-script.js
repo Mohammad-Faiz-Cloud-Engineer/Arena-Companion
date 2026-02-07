@@ -1,8 +1,9 @@
 /**
  * Content Script - Arena Companion
  * Handles UI cleanup and prompt injection for Arena.AI
+ * @module content-script
  * @author Mohammad Faiz
- * @version 1.3.2
+ * @version 1.3.3
  */
 
 (() => {
@@ -66,11 +67,32 @@
   // LOGGING
   // ============================================================================
 
+  const IS_PRODUCTION = (() => {
+    try {
+      const manifest = chrome.runtime.getManifest();
+      return !manifest.version.includes('dev');
+    } catch {
+      return true;
+    }
+  })();
+
   const log = {
-    info: (...args) => console.log('[Arena Companion]', ...args),
-    debug: (...args) => console.debug('[Arena Companion]', ...args),
+    info: (...args) => {
+      if (!IS_PRODUCTION) {
+        console.log('[Arena Companion]', ...args);
+      }
+    },
+    debug: (...args) => {
+      if (!IS_PRODUCTION) {
+        console.debug('[Arena Companion]', ...args);
+      }
+    },
     error: (...args) => console.error('[Arena Companion]', ...args),
-    warn: (...args) => console.warn('[Arena Companion]', ...args)
+    warn: (...args) => {
+      if (!IS_PRODUCTION) {
+        console.warn('[Arena Companion]', ...args);
+      }
+    }
   };
 
   // ============================================================================
@@ -452,7 +474,7 @@
   // ============================================================================
 
   const initialize = () => {
-    log.info('Content script initializing v1.3.2 on:', window.location.href);
+    log.info('Content script initializing v1.3.3 on:', window.location.href);
 
     // Store init time
     initStartTime = Date.now();
@@ -498,10 +520,13 @@
     checkPendingActions();
   }, { once: true });
 
-  // Clean up processed action IDs periodically
+  // Clean up processed action IDs periodically to prevent memory leaks
   setInterval(() => {
-    if (processedActionIds.size > 100) {
-      const idsToKeep = Array.from(processedActionIds).slice(-50);
+    const MAX_IDS = 100;
+    const KEEP_IDS = 50;
+    
+    if (processedActionIds.size > MAX_IDS) {
+      const idsToKeep = Array.from(processedActionIds).slice(-KEEP_IDS);
       processedActionIds.clear();
       idsToKeep.forEach((id) => processedActionIds.add(id));
       log.debug('Cleaned up processed action IDs');

@@ -1,7 +1,9 @@
 /**
  * User Details Management Module
  * Handles user data with professional error handling and validation
+ * @module user-details
  * @author Mohammad Faiz
+ * @version 1.3.1
  */
 
 import { storage } from './storage.js';
@@ -49,7 +51,7 @@ const validateEmail = (email) => {
 };
 
 /**
- * Sanitizes user input
+ * Sanitizes user input with enhanced XSS prevention
  * @param {string} input - Input to sanitize
  * @param {number} maxLength - Maximum allowed length
  * @returns {string} Sanitized input
@@ -58,6 +60,10 @@ const sanitizeInput = (input, maxLength) => {
   if (typeof input !== 'string') return '';
   return input
     .trim()
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
     .replace(/[<>'"&]/g, '')
     .substring(0, maxLength);
 };
@@ -164,24 +170,6 @@ export const userDetails = Object.freeze({
       logger.info('User details cleared');
     } catch (error) {
       logger.error('Failed to clear user details', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Exports user details for backup
-   * @returns {Promise<Object>} User details with metadata
-   */
-  async export() {
-    try {
-      const details = await this.get();
-      return {
-        ...details,
-        exportedAt: new Date().toISOString(),
-        version: '1.0.0'
-      };
-    } catch (error) {
-      logger.error('Failed to export user details', error);
       throw error;
     }
   }

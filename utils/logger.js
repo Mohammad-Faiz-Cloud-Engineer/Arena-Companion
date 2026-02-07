@@ -1,7 +1,9 @@
 /**
  * Production Logger Utility
  * Conditional logging based on environment with performance optimization
+ * @module logger
  * @author Mohammad Faiz
+ * @version 1.3.1
  */
 
 const IS_PRODUCTION = (() => {
@@ -34,7 +36,23 @@ const sanitizeLogData = (data) => {
     // Mask potential sensitive patterns
     return data
       .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]')
-      .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE_REDACTED]');
+      .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE_REDACTED]')
+      .replace(/\b(?:Bearer|Token)\s+[A-Za-z0-9._-]+/gi, '[TOKEN_REDACTED]')
+      .replace(/\b[A-Za-z0-9]{32,}\b/g, '[KEY_REDACTED]');
+  }
+  if (typeof data === 'object' && data !== null) {
+    const sanitized = Array.isArray(data) ? [] : {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        // Redact sensitive keys
+        if (/password|token|secret|key|auth/i.test(key)) {
+          sanitized[key] = '[REDACTED]';
+        } else {
+          sanitized[key] = sanitizeLogData(data[key]);
+        }
+      }
+    }
+    return sanitized;
   }
   return data;
 };

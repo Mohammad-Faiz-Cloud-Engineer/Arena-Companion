@@ -1,7 +1,9 @@
 /**
  * Storage Management Module
  * Professional wrapper for chrome.storage.local with error handling and data sanitization
+ * @module storage
  * @author Mohammad Faiz
+ * @version 1.3.1
  */
 
 import { logger } from './logger.js';
@@ -9,36 +11,76 @@ import { CONFIG, ERROR_MESSAGES } from './constants.js';
 
 /**
  * Sanitizes input data to prevent XSS and injection attacks
+ * Enhanced with comprehensive edge case handling
  * @param {*} data - Data to sanitize
+ * @param {number} [depth=0] - Current recursion depth to prevent stack overflow
  * @returns {*} Sanitized data
  */
-const sanitizeData = (data) => {
+const sanitizeData = (data, depth = 0) => {
+  // Prevent infinite recursion and stack overflow
+  const MAX_DEPTH = 10;
+  if (depth > MAX_DEPTH) {
+    logger.warn('Maximum sanitization depth exceeded');
+    return null;
+  }
+
+  // Handle null and undefined
   if (data === null || data === undefined) {
     return data;
   }
   
+  // Handle strings with comprehensive XSS prevention
   if (typeof data === 'string') {
-    // Remove potentially dangerous characters and limit length
     return data
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '')
       .replace(/[<>'"&]/g, '')
       .substring(0, CONFIG.VALIDATION.MAX_STRING_LENGTH);
   }
   
-  if (typeof data === 'number' || typeof data === 'boolean') {
+  // Handle numbers with safety checks
+  if (typeof data === 'number') {
+    return Number.isFinite(data) ? data : 0;
+  }
+  
+  // Handle booleans
+  if (typeof data === 'boolean') {
     return data;
   }
   
+  // Handle objects and arrays with prototype pollution prevention
   if (typeof data === 'object') {
-    const sanitized = Array.isArray(data) ? [] : {};
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        sanitized[key] = sanitizeData(data[key]);
-      }
+    // Reject non-plain objects and non-arrays
+    const isPlainObject = Object.prototype.toString.call(data) === '[object Object]';
+    const isArray = Array.isArray(data);
+    
+    if (!isPlainObject && !isArray) {
+      return null;
     }
+    
+    const sanitized = isArray ? [] : {};
+    
+    for (const key in data) {
+      if (!Object.prototype.hasOwnProperty.call(data, key)) {
+        continue;
+      }
+      
+      // Prevent prototype pollution attacks
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        continue;
+      }
+      
+      // Recursively sanitize with depth tracking
+      sanitized[key] = sanitizeData(data[key], depth + 1);
+    }
+    
     return sanitized;
   }
   
-  return data;
+  // Reject functions, symbols, and other types
+  return null;
 };
 
 /**
