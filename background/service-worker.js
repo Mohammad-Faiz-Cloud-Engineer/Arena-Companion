@@ -326,6 +326,22 @@ const createContextMenus = () => {
         contexts: ['selection']
       });
 
+      // Child: Quiz Me
+      chrome.contextMenus.create({
+        id: CONTEXT_MENU_IDS.QUIZ_ME,
+        parentId: CONTEXT_MENU_IDS.ARENA_TOOLS,
+        title: 'Quiz Me',
+        contexts: ['selection']
+      });
+
+      // Child: Proofread
+      chrome.contextMenus.create({
+        id: CONTEXT_MENU_IDS.PROOFREAD,
+        parentId: CONTEXT_MENU_IDS.ARENA_TOOLS,
+        title: 'Proofread',
+        contexts: ['selection']
+      });
+
       logger.info('Context menus created successfully');
     });
   } catch (error) {
@@ -405,6 +421,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
       case CONTEXT_MENU_IDS.REWRITE:
         await handleTextAction('rewrite', selectionText, tabInfo);
+        break;
+
+      case CONTEXT_MENU_IDS.QUIZ_ME:
+        await handleTextAction('quizMe', selectionText, tabInfo);
+        break;
+
+      case CONTEXT_MENU_IDS.PROOFREAD:
+        await handleTextAction('proofread', selectionText, tabInfo);
         break;
 
       default:
