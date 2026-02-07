@@ -5,6 +5,53 @@ All notable changes to Arena Companion will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-07
+
+### 🎉 Text Selection Actions - Major Feature Release
+
+### Added
+- **Arena Tools Context Menu**
+  - New "Arena Tools" submenu appears on text selection
+  - **Summarize**: Condense selected text with AI
+  - **Explain**: Get simple explanations of concepts
+  - **Rewrite**: Improve and rewrite content
+
+- **Robust Prompt Injection System**
+  - 13+ textarea selectors for Arena.AI input detection
+  - 9+ button selectors for send button detection
+  - React/Gradio/Vue event dispatching for framework compatibility
+  - Native input value setter for bypassing synthetic event systems
+
+- **Dual Delivery System**
+  - Message broadcasting to all tabs
+  - Storage polling (500ms interval) as backup
+  - Delayed broadcast (1s) for reliability
+  - UUID-based action deduplication
+
+- **Side Panel Enhancements**
+  - 5-retry mechanism for panel opening
+  - Tab-based fallback for window failures
+  - Automatic prompt forwarding to iframe
+  - Visibility-change action checking
+
+### Changed
+- **Manifest**: Added `scripting`, `tabs` permissions; added `<all_urls>` host permission
+- **Content Script**: Changed `run_at` to `document_end`, enabled `all_frames`
+- **Constants**: Added 50+ new configuration values for text actions
+- **Service Worker**: Complete rewrite with handleTextAction workflow
+
+### Security
+- XSS prevention with HTML tag stripping
+- Input sanitization with 50k character limit
+- 30-second action expiry for stale prevention
+- Sensitive data masking in logs maintained
+
+### Performance
+- Side panel opens in < 1 second
+- Prompt injection completes in 3-5 seconds
+- Memory-efficient action ID cleanup
+- No memory leaks from polling
+
 ## [1.2.0] - 2026-02-06
 
 ### Added
