@@ -18,6 +18,7 @@ A production-grade Chrome Extension for seamless [Arena.AI](https://arena.ai/) i
 
 ## Features
 
+- **Text Selection Actions**: Right-click any text to Summarize, Explain, Rewrite, Quiz Me, or Proofread
 - **Modern Side Panel API**: Utilizes Chrome's native `chrome.sidePanel` API
 - **Enterprise Security (A+ Grade)**: Multi-layer XSS prevention, sensitive data redaction, RFC-compliant validation
 - **Performance Optimized (+60%)**: GPU-accelerated animations, CSS containment, non-blocking operations
