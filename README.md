@@ -140,6 +140,8 @@ User details and preferences are stored using `chrome.storage.local` with:
 - Edge 114+
 - Any Chromium-based browser with Manifest V3 support
 
+- Microsoft Edge users: install from Microsoft Edge Add-ons — [Arena Companion on Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/arena-companion/hfpllffcikhjbhfmiiaacenmegimognh)
+
 ## Performance Metrics
 
 - Initial load: < 100ms
