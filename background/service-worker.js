@@ -257,17 +257,16 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
 
     // Schedule delayed broadcasts using Promise-based approach
     const broadcastDelays = [1000, 2000, 3000, 5000];
-    const delayedBroadcasts = broadcastDelays.map((delay) =>
-      new Promise((resolve) => {
-        setTimeout(async () => {
-          await broadcastMessage(message);
+    broadcastDelays.forEach((delay) => {
+      setTimeout(() => {
+        broadcastMessage(message).then(() => {
           logger.debug(`Delayed broadcast sent at ${delay}ms`);
-          resolve();
-        }, delay);
-      })
-    );
+        }).catch((err) => {
+          logger.debug('Delayed broadcast failed', err);
+        });
+      }, delay);
+    });
 
-    // Non-blocking user activity update
     userDetails.updateLastVisit().catch((err) =>
       logger.debug('Failed to update last visit', err)
     );
