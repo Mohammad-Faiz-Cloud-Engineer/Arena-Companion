@@ -182,7 +182,7 @@ const forwardToIframe = (prompt, actionId) => {
 /**
  * Handles messages from the background script
  */
-const handleMessage = (message, sender, sendResponse) => {
+const handleMessage = (message, _sender, sendResponse) => {
   if (message.type === 'INJECT_PROMPT') {
     logger.debug('Received INJECT_PROMPT in sidepanel');
 
