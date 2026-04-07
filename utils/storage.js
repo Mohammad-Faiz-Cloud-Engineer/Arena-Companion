@@ -11,12 +11,13 @@ import { CONFIG, ERROR_MESSAGES } from './constants.js';
 
 /**
  * Sanitizes input data to prevent XSS and injection attacks
- * Enhanced with comprehensive edge case handling
+ * Enhanced with comprehensive edge case handling and circular reference detection
  * @param {*} data - Data to sanitize
  * @param {number} [depth=0] - Current recursion depth to prevent stack overflow
+ * @param {WeakSet} [visited=new WeakSet()] - Track visited objects to detect cycles
  * @returns {*} Sanitized data
  */
-const sanitizeData = (data, depth = 0) => {
+const sanitizeData = (data, depth = 0, visited = new WeakSet()) => {
   // Prevent infinite recursion and stack overflow
   const MAX_DEPTH = 10;
   if (depth > MAX_DEPTH) {
@@ -40,9 +41,13 @@ const sanitizeData = (data, depth = 0) => {
       .substring(0, CONFIG.VALIDATION.MAX_STRING_LENGTH);
   }
   
-  // Handle numbers with safety checks
+  // Handle numbers with safety checks - reject NaN and Infinity explicitly
   if (typeof data === 'number') {
-    return Number.isFinite(data) ? data : 0;
+    if (!Number.isFinite(data)) {
+      logger.warn('Non-finite number detected (NaN or Infinity), rejecting');
+      return null;
+    }
+    return data;
   }
   
   // Handle booleans
@@ -50,8 +55,14 @@ const sanitizeData = (data, depth = 0) => {
     return data;
   }
   
-  // Handle objects and arrays with prototype pollution prevention
+  // Handle objects and arrays with prototype pollution prevention and cycle detection
   if (typeof data === 'object') {
+    // Detect circular references
+    if (visited.has(data)) {
+      logger.warn('Circular reference detected, breaking cycle');
+      return null;
+    }
+    
     // Reject non-plain objects and non-arrays
     const isPlainObject = Object.prototype.toString.call(data) === '[object Object]';
     const isArray = Array.isArray(data);
@@ -59,6 +70,9 @@ const sanitizeData = (data, depth = 0) => {
     if (!isPlainObject && !isArray) {
       return null;
     }
+    
+    // Mark this object as visited
+    visited.add(data);
     
     const sanitized = isArray ? [] : {};
     
@@ -72,8 +86,8 @@ const sanitizeData = (data, depth = 0) => {
         continue;
       }
       
-      // Recursively sanitize with depth tracking
-      sanitized[key] = sanitizeData(data[key], depth + 1);
+      // Recursively sanitize with depth tracking and visited set
+      sanitized[key] = sanitizeData(data[key], depth + 1, visited);
     }
     
     return sanitized;
