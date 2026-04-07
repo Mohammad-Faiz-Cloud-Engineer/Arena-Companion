@@ -191,9 +191,8 @@
   const setTextareaValue = (textarea, value) => {
     // Handle contenteditable divs
     if (textarea.contentEditable === 'true') {
+      // Use textContent only - safer than innerHTML
       textarea.textContent = value;
-      textarea.innerText = value;
-      textarea.innerHTML = value;
     } else {
       // Native value setter to bypass React's synthetic event system
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
