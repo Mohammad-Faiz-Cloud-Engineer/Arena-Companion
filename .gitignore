@@ -146,6 +146,3 @@ credentials/
 .cache/
 *.cache
 
-# Scripts (build/deployment tools)
-scripts/
-
