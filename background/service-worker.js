@@ -219,6 +219,8 @@ const openSidePanel = async ({ tabId, windowId }) => {
  * @returns {Promise<void>}
  */
 const handleTextAction = async (action, selectedText, tabInfo) => {
+  const broadcastTimeouts = [];
+  
   try {
     logger.info('Handling text action', { action, tabInfo });
 
@@ -251,27 +253,52 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
       timestamp: Date.now()
     };
 
-    // 6. Optimized broadcast with Promise.all for better performance
+    // 6. Optimized broadcast with Promise.allSettled for better performance
+    // Note: Promise.allSettled properly handles cleanup and garbage collection
     await broadcastMessage(message);
     logger.info('Initial broadcast sent', { action, actionId });
 
-    // Schedule delayed broadcasts using Promise-based approach
+    // Track if action was processed to cancel delayed broadcasts
+    let actionProcessed = false;
+
+    // Listen for successful injection to cancel delayed broadcasts
+    const injectionListener = (msg) => {
+      if (msg.type === 'PROMPT_INJECTED' && msg.actionId === actionId) {
+        actionProcessed = true;
+        broadcastTimeouts.forEach(clearTimeout);
+        broadcastTimeouts.length = 0;
+      }
+    };
+    chrome.runtime.onMessage.addListener(injectionListener);
+
+    // Schedule delayed broadcasts with cancellation support
     const broadcastDelays = [1000, 2000, 3000, 5000];
     broadcastDelays.forEach((delay) => {
-      setTimeout(() => {
-        broadcastMessage(message).then(() => {
-          logger.debug(`Delayed broadcast sent at ${delay}ms`);
-        }).catch((err) => {
-          logger.debug('Delayed broadcast failed', err);
-        });
+      const timeoutId = setTimeout(() => {
+        if (!actionProcessed) {
+          broadcastMessage(message).then(() => {
+            logger.debug(`Delayed broadcast sent at ${delay}ms`);
+          }).catch((err) => {
+            logger.debug('Delayed broadcast failed', err);
+          });
+        }
       }, delay);
+      broadcastTimeouts.push(timeoutId);
     });
+
+    // Cleanup listener after max delay
+    setTimeout(() => {
+      chrome.runtime.onMessage.removeListener(injectionListener);
+    }, 6000);
 
     userDetails.updateLastVisit().catch((err) =>
       logger.debug('Failed to update last visit', err)
     );
   } catch (error) {
     logger.error('Text action failed', error);
+    // Clear any pending broadcasts on error
+    broadcastTimeouts.forEach(clearTimeout);
+    
     // Try to at least open the panel as recovery
     try {
       await openSidePanel(tabInfo);
@@ -469,7 +496,7 @@ self.addEventListener('unhandledrejection', (event) => {
 /**
  * Handle messages from content scripts or popup
  */
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   logger.debug('Message received', message);
 
   (async () => {
