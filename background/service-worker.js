@@ -42,13 +42,31 @@ const sanitizeSelection = (text) => {
     return '';
   }
 
-  return text
-    .trim()
-    .substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH)
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<[^>]+>/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+\s*=/gi, '');
+  // Normalize unicode to prevent unicode-based attacks
+  let sanitized = text.normalize('NFKC').trim();
+  
+  // Limit length first
+  sanitized = sanitized.substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH);
+  
+  // Remove script tags (multiple passes to handle nested attempts)
+  for (let i = 0; i < 3; i++) {
+    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  }
+  
+  // Remove all HTML tags
+  sanitized = sanitized.replace(/<[^>]+>/g, '');
+  
+  // Remove javascript: protocol
+  sanitized = sanitized.replace(/javascript:/gi, '');
+  
+  // Remove event handlers
+  sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+  
+  // Remove data: and vbscript: protocols
+  sanitized = sanitized.replace(/data:/gi, '');
+  sanitized = sanitized.replace(/vbscript:/gi, '');
+  
+  return sanitized;
 };
 
 /**
