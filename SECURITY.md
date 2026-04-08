@@ -95,7 +95,7 @@ Instead, please report security issues via:
 
 | Date       | Version | Auditor        | Result | Notes                           |
 |------------|---------|----------------|--------|---------------------------------|
-| 2026-02-07 | 1.3.1   | Internal       | A+     | Enhanced XSS prevention         |
+| 2026-02-07 | 1.4.0   | Internal       | A+     | Enhanced XSS prevention         |
 | 2026-02-07 | 1.3.0   | Internal       | A      | Text action security review     |
 | 2026-02-01 | 1.1.0   | Internal       | A+     | Major security update           |
 | 2026-01-15 | 1.0.0   | Internal       | B+     | Initial security implementation |
@@ -124,16 +124,9 @@ Arena Companion follows:
 - **Chrome Extension Security Best Practices**: Official Google guidelines
 - **WCAG 2.1 AA**: Accessibility compliance
 - **RFC 5322**: Email validation standard
-
-## Contact
-
-For security-related questions or concerns:
-- **Security Email**: [Your security email]
-- **GitHub**: [Your GitHub profile]
-- **Response Time**: Within 48 hours
-
+- 
 ---
 
-**Last Updated**: February 7, 2026  
-**Version**: 1.3.1  
+**Last Updated**: Apr 8, 2026  
+**Version**: 1.4.0  
 **Security Grade**: A+
