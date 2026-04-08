@@ -51,7 +51,7 @@ const validateEmail = (email) => {
 };
 
 /**
- * Sanitizes user input with enhanced XSS prevention
+ * Sanitizes user input with enhanced XSS prevention using allowlist approach
  * @param {string} input - Input to sanitize
  * @param {number} maxLength - Maximum allowed length
  * @returns {string} Sanitized input
@@ -62,27 +62,22 @@ const sanitizeInput = (input, maxLength) => {
   // Normalize unicode to prevent unicode-based XSS attacks
   let sanitized = input.normalize('NFKC').trim();
   
-  // Remove script tags (multiple passes to handle nested attempts)
-  for (let i = 0; i < 3; i++) {
-    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  }
+  // Limit length first
+  sanitized = sanitized.substring(0, maxLength);
   
-  // Remove all HTML tags
-  sanitized = sanitized.replace(/<[^>]+>/g, '');
+  // Use allowlist approach: only allow safe characters
+  // Allow: letters, numbers, spaces, basic punctuation
+  // This is more secure than blocklist approach
+  sanitized = sanitized.replace(/[^a-zA-Z0-9\s\.\,\!\?\-\_\@\#\$\%\^\&\*\(\)\+\=\[\]\{\}\:\;\'\"\/\|\\~`]/g, '');
   
-  // Remove dangerous protocols
-  sanitized = sanitized.replace(/javascript:/gi, '');
+  // Additional safety: remove any remaining script-like patterns
+  sanitized = sanitized.replace(/script/gi, '');
+  sanitized = sanitized.replace(/javascript/gi, '');
+  sanitized = sanitized.replace(/vbscript/gi, '');
   sanitized = sanitized.replace(/data:/gi, '');
-  sanitized = sanitized.replace(/vbscript:/gi, '');
+  sanitized = sanitized.replace(/on\w+=/gi, '');
   
-  // Remove event handlers
-  sanitized = sanitized.replace(/on\w+\s*=/gi, '');
-  
-  // Remove dangerous characters
-  sanitized = sanitized.replace(/[<>'"&\\]/g, '');
-  
-  // Limit length
-  return sanitized.substring(0, maxLength);
+  return sanitized;
 };
 
 export const userDetails = Object.freeze({
