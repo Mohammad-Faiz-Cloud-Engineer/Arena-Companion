@@ -3,7 +3,7 @@
  * Handles UI cleanup and prompt injection for Arena.AI
  * @module content-script
  * @author Mohammad Faiz
- * @version 1.3.3
+ * @version 1.4.0
  */
 
 (() => {
