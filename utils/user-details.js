@@ -58,13 +58,17 @@ const validateEmail = (email) => {
  */
 const sanitizeInput = (input, maxLength) => {
   if (typeof input !== 'string') return '';
-  return input
+  
+  // Normalize unicode to prevent unicode-based XSS attacks
+  const normalized = input.normalize('NFKC');
+  
+  return normalized
     .trim()
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/<[^>]+>/g, '')
     .replace(/javascript:/gi, '')
     .replace(/on\w+\s*=/gi, '')
-    .replace(/[<>'"&]/g, '')
+    .replace(/[<>'"&\\]/g, '') // Include backslash to prevent escape sequences
     .substring(0, maxLength);
 };
 
