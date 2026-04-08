@@ -477,7 +477,7 @@
   // ============================================================================
 
   const initialize = () => {
-    log.info('Content script initializing v1.3.3 on:', window.location.href);
+    log.info('Content script initializing v1.4.0 on:', window.location.href);
 
     // Store init time
     initStartTime = Date.now();
