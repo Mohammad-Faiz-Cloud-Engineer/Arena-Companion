@@ -50,16 +50,26 @@ const sanitizeSelection = (text) => {
   sanitized = sanitized.substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH);
   
   // For text selection, we want to preserve most content but remove dangerous elements
-  // Remove HTML tags completely
-  sanitized = sanitized.replace(/<[^>]*>/g, '');
+  // Remove HTML tags completely - loop until no more matches
+  while (/<[^>]*>/g.test(sanitized)) {
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+  }
   
-  // Remove dangerous protocols by replacing them with safe text
-  sanitized = sanitized.replace(/javascript:/gi, 'removed:');
-  sanitized = sanitized.replace(/data:/gi, 'removed:');
-  sanitized = sanitized.replace(/vbscript:/gi, 'removed:');
+  // Remove dangerous protocols by replacing them with safe text - loop until no more matches
+  while (/javascript:/gi.test(sanitized)) {
+    sanitized = sanitized.replace(/javascript:/gi, 'removed:');
+  }
+  while (/data:/gi.test(sanitized)) {
+    sanitized = sanitized.replace(/data:/gi, 'removed:');
+  }
+  while (/vbscript:/gi.test(sanitized)) {
+    sanitized = sanitized.replace(/vbscript:/gi, 'removed:');
+  }
   
-  // Remove event handlers
-  sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+  // Remove event handlers - loop until no more matches
+  while (/on\w+\s*=/gi.test(sanitized)) {
+    sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+  }
   
   // Remove any remaining angle brackets that might have been missed
   sanitized = sanitized.replace(/[<>]/g, '');
