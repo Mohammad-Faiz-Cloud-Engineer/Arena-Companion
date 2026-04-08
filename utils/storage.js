@@ -3,7 +3,7 @@
  * Professional wrapper for chrome.storage.local with error handling and data sanitization
  * @module storage
  * @author Mohammad Faiz
- * @version 1.3.1
+ * @version 1.4.0
  */
 
 import { logger } from './logger.js';
