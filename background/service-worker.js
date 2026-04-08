@@ -105,8 +105,9 @@ const broadcastMessage = async (message) => {
         if (tab.id && tab.id !== chrome.tabs.TAB_ID_NONE) {
           await chrome.tabs.sendMessage(tab.id, message);
         }
-      } catch {
-        // Tab might not have content script - silently ignore
+      } catch (error) {
+        // Tab might not have content script - log at debug level
+        logger.debug('Failed to send message to tab', { tabId: tab.id, error: error.message });
       }
     });
 
@@ -220,6 +221,7 @@ const openSidePanel = async ({ tabId, windowId }) => {
  */
 const handleTextAction = async (action, selectedText, tabInfo) => {
   const broadcastTimeouts = [];
+  let injectionListener = null;
   
   try {
     logger.info('Handling text action', { action, tabInfo });
@@ -254,7 +256,6 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
     };
 
     // 6. Optimized broadcast with Promise.allSettled for better performance
-    // Note: Promise.allSettled properly handles cleanup and garbage collection
     await broadcastMessage(message);
     logger.info('Initial broadcast sent', { action, actionId });
 
@@ -262,7 +263,7 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
     let actionProcessed = false;
 
     // Listen for successful injection to cancel delayed broadcasts
-    const injectionListener = (msg) => {
+    injectionListener = (msg) => {
       if (msg.type === 'PROMPT_INJECTED' && msg.actionId === actionId) {
         actionProcessed = true;
         broadcastTimeouts.forEach(clearTimeout);
@@ -286,18 +287,30 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
       broadcastTimeouts.push(timeoutId);
     });
 
-    // Cleanup listener after max delay
+    // Cleanup listener and timeouts after max delay
     setTimeout(() => {
-      chrome.runtime.onMessage.removeListener(injectionListener);
+      if (injectionListener) {
+        chrome.runtime.onMessage.removeListener(injectionListener);
+        injectionListener = null;
+      }
+      // Clear any remaining timeouts
+      broadcastTimeouts.forEach(clearTimeout);
+      broadcastTimeouts.length = 0;
     }, 6000);
 
-    userDetails.updateLastVisit().catch((err) =>
+    await userDetails.updateLastVisit().catch((err) =>
       logger.debug('Failed to update last visit', err)
     );
   } catch (error) {
     logger.error('Text action failed', error);
     // Clear any pending broadcasts on error
     broadcastTimeouts.forEach(clearTimeout);
+    broadcastTimeouts.length = 0;
+    
+    // Remove listener if it was added
+    if (injectionListener) {
+      chrome.runtime.onMessage.removeListener(injectionListener);
+    }
     
     // Try to at least open the panel as recovery
     try {
