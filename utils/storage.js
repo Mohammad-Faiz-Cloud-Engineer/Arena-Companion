@@ -32,20 +32,23 @@ const sanitizeData = (data, depth = 0, visited = new WeakSet()) => {
   
   // Handle strings with comprehensive XSS prevention
   if (typeof data === 'string') {
-    return data
+    // Normalize unicode to prevent unicode-based XSS attacks
+    const normalized = data.normalize('NFKC');
+    
+    return normalized
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/<[^>]+>/g, '')
       .replace(/javascript:/gi, '')
       .replace(/on\w+\s*=/gi, '')
-      .replace(/[<>'"&]/g, '')
+      .replace(/[<>'"&\\]/g, '') // Include backslash to prevent escape sequences
       .substring(0, CONFIG.VALIDATION.MAX_STRING_LENGTH);
   }
   
   // Handle numbers with safety checks - reject NaN and Infinity explicitly
   if (typeof data === 'number') {
     if (!Number.isFinite(data)) {
-      logger.warn('Non-finite number detected (NaN or Infinity), rejecting');
-      return null;
+      logger.warn('Non-finite number detected (NaN or Infinity), converting to 0');
+      return 0; // Return 0 instead of null to maintain data type consistency
     }
     return data;
   }
