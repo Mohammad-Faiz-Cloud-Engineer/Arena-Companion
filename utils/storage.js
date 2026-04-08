@@ -43,12 +43,22 @@ const sanitizeData = (data, depth = 0, visited = new WeakSet()) => {
     // This is more secure than blocklist approach for storage
     sanitized = sanitized.replace(/[^a-zA-Z0-9\s\.\,\!\?\-\_\@\#\$\%\^\&\*\(\)\+\=\[\]\{\}\:\;\'\"\/\|\\~`\n\r\t]/g, '');
     
-    // Additional safety: remove any remaining dangerous patterns
-    sanitized = sanitized.replace(/script/gi, '');
-    sanitized = sanitized.replace(/javascript/gi, '');
-    sanitized = sanitized.replace(/vbscript/gi, '');
-    sanitized = sanitized.replace(/data:/gi, '');
-    sanitized = sanitized.replace(/on\w+=/gi, '');
+    // Additional safety: remove any remaining dangerous patterns - loop until no more matches
+    while (/script/gi.test(sanitized)) {
+      sanitized = sanitized.replace(/script/gi, '');
+    }
+    while (/javascript/gi.test(sanitized)) {
+      sanitized = sanitized.replace(/javascript/gi, '');
+    }
+    while (/vbscript/gi.test(sanitized)) {
+      sanitized = sanitized.replace(/vbscript/gi, '');
+    }
+    while (/data:/gi.test(sanitized)) {
+      sanitized = sanitized.replace(/data:/gi, '');
+    }
+    while (/on\w+=/gi.test(sanitized)) {
+      sanitized = sanitized.replace(/on\w+=/gi, '');
+    }
     
     return sanitized;
   }
