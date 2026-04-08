@@ -33,15 +33,29 @@ const sanitizeData = (data, depth = 0, visited = new WeakSet()) => {
   // Handle strings with comprehensive XSS prevention
   if (typeof data === 'string') {
     // Normalize unicode to prevent unicode-based XSS attacks
-    const normalized = data.normalize('NFKC');
+    let sanitized = data.normalize('NFKC');
     
-    return normalized
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<[^>]+>/g, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+\s*=/gi, '')
-      .replace(/[<>'"&\\]/g, '') // Include backslash to prevent escape sequences
-      .substring(0, CONFIG.VALIDATION.MAX_STRING_LENGTH);
+    // Remove script tags (multiple passes to handle nested attempts)
+    for (let i = 0; i < 3; i++) {
+      sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    }
+    
+    // Remove all HTML tags
+    sanitized = sanitized.replace(/<[^>]+>/g, '');
+    
+    // Remove dangerous protocols
+    sanitized = sanitized.replace(/javascript:/gi, '');
+    sanitized = sanitized.replace(/data:/gi, '');
+    sanitized = sanitized.replace(/vbscript:/gi, '');
+    
+    // Remove event handlers
+    sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+    
+    // Remove dangerous characters
+    sanitized = sanitized.replace(/[<>'"&\\]/g, '');
+    
+    // Limit length
+    return sanitized.substring(0, CONFIG.VALIDATION.MAX_STRING_LENGTH);
   }
   
   // Handle numbers with safety checks - reject NaN and Infinity explicitly
