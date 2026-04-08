@@ -3,7 +3,7 @@
  * Handles iframe loading, refresh functionality, user interactions, and prompt forwarding
  * @module main
  * @author Mohammad Faiz
- * @version 1.3.1
+ * @version 1.4.0
  */
 
 import { logger } from '../../utils/logger.js';
@@ -279,7 +279,7 @@ const cleanup = () => {
  */
 const initialize = async () => {
   try {
-    logger.info('Initializing side panel v1.3.1');
+    logger.info('Initializing side panel v1.4.0');
 
     initializeDOMReferences();
     initializeIframe();
