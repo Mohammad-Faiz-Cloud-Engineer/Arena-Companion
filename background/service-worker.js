@@ -34,6 +34,7 @@ const generateUUID = () => {
 
 /**
  * Sanitizes selected text to prevent XSS attacks
+ * Uses a balanced approach: preserve content while removing dangerous elements
  * @param {string} text - Raw selected text
  * @returns {string} Sanitized text
  */
@@ -48,23 +49,20 @@ const sanitizeSelection = (text) => {
   // Limit length first
   sanitized = sanitized.substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH);
   
-  // Remove script tags (multiple passes to handle nested attempts)
-  for (let i = 0; i < 3; i++) {
-    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  }
+  // For text selection, we want to preserve most content but remove dangerous elements
+  // Remove HTML tags completely
+  sanitized = sanitized.replace(/<[^>]*>/g, '');
   
-  // Remove all HTML tags
-  sanitized = sanitized.replace(/<[^>]+>/g, '');
-  
-  // Remove javascript: protocol
-  sanitized = sanitized.replace(/javascript:/gi, '');
+  // Remove dangerous protocols by replacing them with safe text
+  sanitized = sanitized.replace(/javascript:/gi, 'removed:');
+  sanitized = sanitized.replace(/data:/gi, 'removed:');
+  sanitized = sanitized.replace(/vbscript:/gi, 'removed:');
   
   // Remove event handlers
   sanitized = sanitized.replace(/on\w+\s*=/gi, '');
   
-  // Remove data: and vbscript: protocols
-  sanitized = sanitized.replace(/data:/gi, '');
-  sanitized = sanitized.replace(/vbscript:/gi, '');
+  // Remove any remaining angle brackets that might have been missed
+  sanitized = sanitized.replace(/[<>]/g, '');
   
   return sanitized;
 };
