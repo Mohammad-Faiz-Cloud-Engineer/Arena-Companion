@@ -15,12 +15,12 @@
 
   const STYLE_ID = 'arena-companion-cleanup';
   const STORAGE_KEY = 'arena_companion_pending_action';
-  const POLL_INTERVAL = 300; // Faster polling for reliability
-  const INITIAL_POLL_INTERVAL = 100; // Very fast initial polling
-  const INITIAL_POLL_DURATION = 10000; // Poll fast for first 10 seconds
-  const MAX_TEXTAREA_ATTEMPTS = 15; // More attempts
-  const ACTION_EXPIRY_MS = 60000; // 60 second expiry
-  const TEXTAREA_SEARCH_DELAY = 300; // Faster retry
+  const POLL_INTERVAL = 300; // 300ms - Balance between responsiveness and CPU usage
+  const INITIAL_POLL_INTERVAL = 100; // 100ms - Aggressive initial polling for fast injection
+  const INITIAL_POLL_DURATION = 10000; // 10s - Duration of fast polling window
+  const MAX_TEXTAREA_ATTEMPTS = 15; // Retry attempts for finding textarea
+  const ACTION_EXPIRY_MS = 60000; // 60s - Actions older than this are discarded
+  const TEXTAREA_SEARCH_DELAY = 300; // 300ms - Delay between textarea search retries
 
   /**
    * Textarea selectors ordered by specificity
@@ -225,22 +225,26 @@
     textarea.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'a' }));
     textarea.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, cancelable: true, key: 'a' }));
 
-    // Try to update React internal state
+    // Try to update React internal state - with additional safety checks
     try {
       const reactKey = Object.keys(textarea).find(
         (key) => key.startsWith('__reactFiber') || key.startsWith('__reactProps') || key.startsWith('__react')
       );
       if (reactKey && textarea[reactKey]) {
         const fiber = textarea[reactKey];
-        if (fiber?.memoizedProps?.onChange) {
-          fiber.memoizedProps.onChange({ target: { value } });
-        }
-        if (fiber?.onChange) {
-          fiber.onChange({ target: { value } });
+        // Validate fiber object structure before accessing
+        if (fiber && typeof fiber === 'object') {
+          if (fiber.memoizedProps && typeof fiber.memoizedProps.onChange === 'function') {
+            fiber.memoizedProps.onChange({ target: { value } });
+          }
+          if (typeof fiber.onChange === 'function') {
+            fiber.onChange({ target: { value } });
+          }
         }
       }
-    } catch {
-      // React state update failed, continue
+    } catch (error) {
+      // React state update failed, continue - log at debug level
+      log.debug('React state update failed', error);
     }
 
     log.info('Textarea value set successfully');
@@ -489,15 +493,8 @@
     // Start aggressive polling immediately
     startPolling();
 
-    // Also check immediately
+    // Check immediately on initialization
     checkPendingActions();
-
-    // Check again after short delays to catch timing issues
-    setTimeout(checkPendingActions, 500);
-    setTimeout(checkPendingActions, 1000);
-    setTimeout(checkPendingActions, 2000);
-    setTimeout(checkPendingActions, 3000);
-    setTimeout(checkPendingActions, 5000);
 
     log.info('Content script initialized');
   };
