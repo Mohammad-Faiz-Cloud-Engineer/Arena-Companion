@@ -50,26 +50,32 @@ const sanitizeSelection = (text) => {
   sanitized = sanitized.substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH);
   
   // For text selection, we want to preserve most content but remove dangerous elements
-  // Remove HTML tags completely - loop until no more matches
-  while (/<[^>]*>/g.test(sanitized)) {
+  // Remove HTML tags completely - loop until stable
+  let previous;
+  do {
+    previous = sanitized;
     sanitized = sanitized.replace(/<[^>]*>/g, '');
-  }
+  } while (sanitized !== previous);
   
-  // Remove dangerous protocols by replacing them with safe text - loop until no more matches
-  while (/javascript:/gi.test(sanitized)) {
+  // Remove dangerous protocols by replacing them with safe text
+  do {
+    previous = sanitized;
     sanitized = sanitized.replace(/javascript:/gi, 'removed:');
-  }
-  while (/data:/gi.test(sanitized)) {
+  } while (sanitized !== previous);
+  do {
+    previous = sanitized;
     sanitized = sanitized.replace(/data:/gi, 'removed:');
-  }
-  while (/vbscript:/gi.test(sanitized)) {
+  } while (sanitized !== previous);
+  do {
+    previous = sanitized;
     sanitized = sanitized.replace(/vbscript:/gi, 'removed:');
-  }
+  } while (sanitized !== previous);
   
-  // Remove event handlers - loop until no more matches
-  while (/on\w+\s*=/gi.test(sanitized)) {
+  // Remove event handlers
+  do {
+    previous = sanitized;
     sanitized = sanitized.replace(/on\w+\s*=/gi, '');
-  }
+  } while (sanitized !== previous);
   
   // Remove any remaining angle brackets that might have been missed
   sanitized = sanitized.replace(/[<>]/g, '');
@@ -555,12 +561,26 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
         case 'DOWNLOAD_FILE': {
           try {
+            // Validate URL to prevent arbitrary downloads
+            const downloadUrl = message.url;
+            if (!downloadUrl || typeof downloadUrl !== 'string') {
+              throw new Error('Invalid download URL');
+            }
+            let parsedUrl;
+            try {
+              parsedUrl = new URL(downloadUrl);
+            } catch {
+              throw new Error('Malformed download URL');
+            }
+            if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+              throw new Error('Only HTTP/HTTPS downloads are allowed');
+            }
             const downloadId = await chrome.downloads.download({
-              url: message.url,
+              url: downloadUrl,
               filename: message.filename || undefined,
               saveAs: message.saveAs || false
             });
-            logger.info('Download started', { downloadId, url: message.url });
+            logger.info('Download started', { downloadId });
             sendResponse({ success: true, downloadId });
           } catch (downloadError) {
             logger.error('Download failed', downloadError);
