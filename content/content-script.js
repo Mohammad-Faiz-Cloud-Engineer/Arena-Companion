@@ -21,6 +21,7 @@
   const MAX_TEXTAREA_ATTEMPTS = 15; // Retry attempts for finding textarea
   const ACTION_EXPIRY_MS = 60000; // 60s - Actions older than this are discarded
   const TEXTAREA_SEARCH_DELAY = 300; // 300ms - Delay between textarea search retries
+  const ID_CLEANUP_INTERVAL = 60000; // 60s - Interval for cleaning up processed action IDs
 
   /**
    * Textarea selectors ordered by specificity
@@ -501,10 +502,7 @@
 
   // Initialize based on document state
   if (document.readyState === 'loading') {
-    // Start polling even before DOM is ready
-    startPolling();
-    checkPendingActions();
-
+    // Defer to initialize() which starts polling — avoid duplicate intervals
     document.addEventListener('DOMContentLoaded', initialize, { once: true });
   } else {
     initialize();
@@ -527,5 +525,5 @@
       idsToKeep.forEach((id) => processedActionIds.add(id));
       log.debug('Cleaned up processed action IDs');
     }
-  }, 60000);
+  }, ID_CLEANUP_INTERVAL);
 })();
