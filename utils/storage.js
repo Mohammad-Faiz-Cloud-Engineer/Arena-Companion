@@ -38,27 +38,37 @@ const sanitizeData = (data, depth = 0, visited = new WeakSet()) => {
     // Limit length first
     sanitized = sanitized.substring(0, CONFIG.VALIDATION.MAX_STRING_LENGTH);
     
-    // Use allowlist approach: only allow safe characters
-    // Allow: letters, numbers, spaces, basic punctuation, newlines, tabs
-    // This is more secure than blocklist approach for storage
-    sanitized = sanitized.replace(/[^a-zA-Z0-9\s\.\,\!\?\-\_\@\#\$\%\^\&\*\(\)\+\=\[\]\{\}\:\;\'\"\/\|\\~`\n\r\t]/g, '');
+    // Remove control characters (except newline, carriage return, tab) but preserve Unicode
+    // This supports internationalization while blocking dangerous control chars
+    sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
     
-    // Additional safety: remove any remaining dangerous patterns - loop until no more matches
-    while (/script/gi.test(sanitized)) {
-      sanitized = sanitized.replace(/script/gi, '');
-    }
-    while (/javascript/gi.test(sanitized)) {
-      sanitized = sanitized.replace(/javascript/gi, '');
-    }
-    while (/vbscript/gi.test(sanitized)) {
-      sanitized = sanitized.replace(/vbscript/gi, '');
-    }
-    while (/data:/gi.test(sanitized)) {
+    // Remove HTML tags
+    let previous;
+    do {
+      previous = sanitized;
+      sanitized = sanitized.replace(/<[^>]*>/g, '');
+    } while (sanitized !== previous);
+    
+    // Remove dangerous patterns via stable do/while loops
+    do {
+      previous = sanitized;
+      sanitized = sanitized.replace(/javascript:/gi, '');
+    } while (sanitized !== previous);
+    do {
+      previous = sanitized;
+      sanitized = sanitized.replace(/vbscript:/gi, '');
+    } while (sanitized !== previous);
+    do {
+      previous = sanitized;
       sanitized = sanitized.replace(/data:/gi, '');
-    }
-    while (/on\w+=/gi.test(sanitized)) {
+    } while (sanitized !== previous);
+    do {
+      previous = sanitized;
       sanitized = sanitized.replace(/on\w+=/gi, '');
-    }
+    } while (sanitized !== previous);
+    
+    // Remove remaining angle brackets
+    sanitized = sanitized.replace(/[<>]/g, '');
     
     return sanitized;
   }
