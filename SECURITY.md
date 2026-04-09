@@ -6,8 +6,9 @@ We take security seriously. The following versions of Arena Companion are curren
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 1.4.x   | :white_check_mark: |
 | 1.3.x   | :white_check_mark: |
-| 1.2.x   | :white_check_mark: |
+| 1.2.x   | :x:                |
 | 1.1.x   | :x:                |
 | < 1.1   | :x:                |
 
