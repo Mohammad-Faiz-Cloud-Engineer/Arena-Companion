@@ -152,7 +152,7 @@ User details and preferences are stored using `chrome.storage.local` with:
 
 ## License
 
-MIT License - See LICENSE file for details
+BSD-2-Clause license - See LICENSE file for details
 
 ## Author
 
