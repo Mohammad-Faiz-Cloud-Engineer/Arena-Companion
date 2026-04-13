@@ -24,7 +24,6 @@
     "https://*.arena.ai/*",
     "<all_urls>"
   ],
-  "_comment_host_permissions": "The <all_urls> permission is required to enable context menu functionality (text selection actions like Summarize, Explain, Rewrite) on any webpage. This is a standard requirement for context menu extensions and does not grant the extension access to page content without user interaction.",
   "content_scripts": [
     {
       "matches": ["https://arena.ai/*", "https://*.arena.ai/*"],
