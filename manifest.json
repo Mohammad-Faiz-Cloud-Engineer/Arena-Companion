@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Arena Companion",
   "version": "1.4.0",
-  "description": "Professional Chrome Extension for seamless Arena.AI integration in your browser's side panel",
+  "description": "Access Arena.AI directly from your browser's side panel for quick AI assistance while browsing",
   "author": "Mohammad Faiz",
   "icons": {
     "16": "icons/png/icon16.png",
