@@ -1,7 +1,6 @@
 # Arena Companion
 
-**Version:** 1.4.0  
-**Status:** Production Ready ✅
+**Version:** 1.4.0
 
 [![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/Mohammad-Faiz-Cloud-Engineer/arena-companion/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
