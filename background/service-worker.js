@@ -9,6 +9,7 @@
 import { logger } from '../utils/logger.js';
 import { userDetails } from '../utils/user-details.js';
 import {
+  ARENA_HOST_PATTERNS,
   CONFIG,
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
@@ -25,6 +26,22 @@ const generateUUID = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0'));
+    return [
+      hex.slice(0, 4).join(''),
+      hex.slice(4, 6).join(''),
+      hex.slice(6, 8).join(''),
+      hex.slice(8, 10).join(''),
+      hex.slice(10, 16).join('')
+    ].join('-');
+  }
+
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
@@ -33,54 +50,57 @@ const generateUUID = () => {
 };
 
 /**
- * Sanitizes selected text to prevent XSS attacks
- * Uses a balanced approach: preserve content while removing dangerous elements
+ * Normalizes selected text before it is sent through extension messaging
  * @param {string} text - Raw selected text
- * @returns {string} Sanitized text
+ * @returns {string} Normalized text
  */
 const sanitizeSelection = (text) => {
   if (!text || typeof text !== 'string') {
     return '';
   }
 
-  // Normalize unicode to prevent unicode-based attacks
-  let sanitized = text.normalize('NFKC').trim();
-  
-  // Limit length first
-  sanitized = sanitized.substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH);
-  
-  // For text selection, we want to preserve most content but remove dangerous elements
-  // Remove HTML tags completely - loop until stable
-  let previous;
-  do {
-    previous = sanitized;
-    sanitized = sanitized.replace(/<[^>]*>/g, '');
-  } while (sanitized !== previous);
-  
-  // Remove dangerous protocols by replacing them with safe text
-  do {
-    previous = sanitized;
-    sanitized = sanitized.replace(/javascript:/gi, 'removed:');
-  } while (sanitized !== previous);
-  do {
-    previous = sanitized;
-    sanitized = sanitized.replace(/data:/gi, 'removed:');
-  } while (sanitized !== previous);
-  do {
-    previous = sanitized;
-    sanitized = sanitized.replace(/vbscript:/gi, 'removed:');
-  } while (sanitized !== previous);
-  
-  // Remove event handlers
-  do {
-    previous = sanitized;
-    sanitized = sanitized.replace(/on\w+\s*=/gi, '');
-  } while (sanitized !== previous);
-  
-  // Remove any remaining angle brackets that might have been missed
-  sanitized = sanitized.replace(/[<>]/g, '');
-  
-  return sanitized;
+  const sanitized = text
+    .normalize('NFKC')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .trim();
+
+  return sanitized.substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH);
+};
+
+const isValidTabId = (tabId) =>
+  Number.isInteger(tabId) && tabId >= 0 && tabId !== chrome.tabs.TAB_ID_NONE;
+
+const isValidWindowId = (windowId) =>
+  Number.isInteger(windowId) && windowId >= 0 && windowId !== chrome.windows.WINDOW_ID_NONE;
+
+const sanitizeDownloadFilename = (filename) => {
+  if (filename === undefined || filename === null || filename === '') {
+    return undefined;
+  }
+
+  if (typeof filename !== 'string') {
+    throw new Error('Invalid download filename');
+  }
+
+  const normalized = filename
+    .trim()
+    .replace(/[\\]+/g, '/')
+    .replace(/^\/+/, '');
+
+  if (
+    !normalized ||
+    normalized.length > CONFIG.VALIDATION.MAX_DOWNLOAD_FILENAME_LENGTH ||
+    /[\x00-\x1F\x7F]/.test(normalized)
+  ) {
+    throw new Error('Invalid download filename');
+  }
+
+  const segments = normalized.split('/');
+  if (segments.some((segment) => !segment || segment === '.' || segment === '..')) {
+    throw new Error('Invalid download filename');
+  }
+
+  return normalized;
 };
 
 /**
@@ -125,16 +145,20 @@ const storePendingAction = async (prompt) => {
 };
 
 /**
- * Broadcasts a message to all tabs
+ * Delivers a message to Arena contexts in the active window and the extension runtime
  * @param {Object} message - Message to broadcast
  * @returns {Promise<void>}
  */
-const broadcastMessage = async (message) => {
+const broadcastMessage = async (message, windowId) => {
   try {
-    const tabs = await chrome.tabs.query({});
+    const tabs = await chrome.tabs.query(
+      isValidWindowId(windowId)
+        ? { windowId, url: ARENA_HOST_PATTERNS }
+        : { currentWindow: true, url: ARENA_HOST_PATTERNS }
+    );
     const promises = tabs.map(async (tab) => {
       try {
-        if (tab.id && tab.id !== chrome.tabs.TAB_ID_NONE) {
+        if (isValidTabId(tab.id)) {
           await chrome.tabs.sendMessage(tab.id, message);
         }
       } catch (error) {
@@ -143,8 +167,12 @@ const broadcastMessage = async (message) => {
       }
     });
 
-    await Promise.allSettled(promises);
-    logger.debug('Broadcast complete', { tabCount: tabs.length });
+    const runtimeBroadcast = chrome.runtime.sendMessage(message).catch((error) => {
+      logger.debug('Runtime broadcast skipped', error);
+    });
+
+    await Promise.allSettled([...promises, runtimeBroadcast]);
+    logger.debug('Broadcast complete', { tabCount: tabs.length, windowId });
   } catch (error) {
     logger.error('Broadcast failed', error);
   }
@@ -158,7 +186,7 @@ const broadcastMessage = async (message) => {
  */
 const openSidePanelByTab = async (tabId, retryCount = 0) => {
   try {
-    if (typeof tabId !== 'number' || tabId < 0 || tabId === chrome.tabs.TAB_ID_NONE) {
+    if (!isValidTabId(tabId)) {
       throw new Error('Invalid tab ID');
     }
 
@@ -189,7 +217,7 @@ const openSidePanelByTab = async (tabId, retryCount = 0) => {
  */
 const openSidePanelByWindow = async (windowId, retryCount = 0) => {
   try {
-    if (typeof windowId !== 'number' || windowId < 0 || windowId === chrome.windows.WINDOW_ID_NONE) {
+    if (!isValidWindowId(windowId)) {
       throw new Error(ERROR_MESSAGES.INVALID_TAB);
     }
 
@@ -219,13 +247,13 @@ const openSidePanelByWindow = async (windowId, retryCount = 0) => {
  */
 const openSidePanel = async ({ tabId, windowId }) => {
   // Method 1: Try using tabId first (most reliable from context menu)
-  if (tabId && typeof tabId === 'number') {
+  if (isValidTabId(tabId)) {
     const success = await openSidePanelByTab(tabId);
     if (success) return true;
   }
 
   // Method 2: Try using windowId
-  if (windowId && typeof windowId === 'number') {
+  if (isValidWindowId(windowId)) {
     const success = await openSidePanelByWindow(windowId);
     if (success) return true;
   }
@@ -233,7 +261,7 @@ const openSidePanel = async ({ tabId, windowId }) => {
   // Method 3: Get active tab and try with that
   try {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tabs[0]?.id) {
+    if (isValidTabId(tabs[0]?.id)) {
       const success = await openSidePanelByTab(tabs[0].id);
       if (success) return true;
     }
@@ -288,7 +316,7 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
     };
 
     // 6. Optimized broadcast with Promise.allSettled for better performance
-    await broadcastMessage(message);
+    await broadcastMessage(message, tabInfo.windowId);
     logger.info('Initial broadcast sent', { action, actionId });
 
     // Track if action was processed to cancel delayed broadcasts
@@ -309,7 +337,7 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
     broadcastDelays.forEach((delay) => {
       const timeoutId = setTimeout(() => {
         if (!actionProcessed) {
-          broadcastMessage(message).then(() => {
+          broadcastMessage(message, tabInfo.windowId).then(() => {
             logger.debug(`Delayed broadcast sent at ${delay}ms`);
           }).catch((err) => {
             logger.debug('Delayed broadcast failed', err);
@@ -425,7 +453,7 @@ const createContextMenus = () => {
  */
 chrome.action.onClicked.addListener(async (tab) => {
   try {
-    if (!tab?.id && !tab?.windowId) {
+    if (!isValidTabId(tab?.id) && !isValidWindowId(tab?.windowId)) {
       logger.error(ERROR_MESSAGES.INVALID_TAB);
       return;
     }
@@ -467,10 +495,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       windowId: tab?.windowId
     };
 
-    if (!tabInfo.tabId && !tabInfo.windowId) {
-      logger.error(ERROR_MESSAGES.INVALID_TAB);
-      return;
-    }
+      if (!isValidTabId(tabInfo.tabId) && !isValidWindowId(tabInfo.windowId)) {
+        logger.error(ERROR_MESSAGES.INVALID_TAB);
+        return;
+      }
 
     const { menuItemId, selectionText } = info;
 
@@ -575,10 +603,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
               throw new Error('Only HTTP/HTTPS downloads are allowed');
             }
+            const filename = sanitizeDownloadFilename(message.filename);
+            const saveAs = typeof message.saveAs === 'boolean' ? message.saveAs : false;
             const downloadId = await chrome.downloads.download({
               url: downloadUrl,
-              filename: message.filename || undefined,
-              saveAs: message.saveAs || false
+              filename,
+              saveAs
             });
             logger.info('Download started', { downloadId });
             sendResponse({ success: true, downloadId });
