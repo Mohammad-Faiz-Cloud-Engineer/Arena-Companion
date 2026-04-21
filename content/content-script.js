@@ -22,6 +22,7 @@
   const ACTION_EXPIRY_MS = 60000; // 60s - Actions older than this are discarded
   const TEXTAREA_SEARCH_DELAY = 300; // 300ms - Delay between textarea search retries
   const ID_CLEANUP_INTERVAL = 60000; // 60s - Interval for cleaning up processed action IDs
+  const MAX_PROMPT_LENGTH = 60000; // Prompt template plus sanitized selection
 
   /**
    * Textarea selectors ordered by specificity
@@ -59,10 +60,20 @@
 
   // Track processed action IDs to prevent duplicates
   const processedActionIds = new Set();
+  const inFlightActionIds = new Set();
 
   // Track if we're in initial fast-polling mode
   let isInitialPolling = true;
   let initStartTime = Date.now();
+  let isCheckingPendingActions = false;
+
+  const EXTENSION_ORIGIN = (() => {
+    try {
+      return new URL(chrome.runtime.getURL('')).origin;
+    } catch {
+      return null;
+    }
+  })();
 
   // ============================================================================
   // LOGGING
@@ -299,14 +310,6 @@
 
   const injectPrompt = async (prompt, actionId) => {
     try {
-      if (processedActionIds.has(actionId)) {
-        log.debug('Action already processed:', actionId);
-        return false;
-      }
-
-      // Mark as processing immediately
-      processedActionIds.add(actionId);
-
       log.info('Starting prompt injection for:', actionId);
 
       // Find textarea with retries
@@ -341,6 +344,67 @@
     }
   };
 
+  const isValidActionId = (actionId) =>
+    typeof actionId === 'string' && /^[a-z0-9-]{8,128}$/i.test(actionId);
+
+  const isValidPrompt = (prompt) =>
+    typeof prompt === 'string' &&
+    prompt.trim().length > 0 &&
+    prompt.length <= MAX_PROMPT_LENGTH;
+
+  const isValidStoredAction = (action) =>
+    action &&
+    typeof action === 'object' &&
+    isValidPrompt(action.prompt) &&
+    isValidActionId(action.id) &&
+    Number.isFinite(action.timestamp);
+
+  const waitForDocumentReady = async () => {
+    if (document.readyState === 'complete') {
+      return;
+    }
+
+    await new Promise((resolve) => {
+      if (document.readyState === 'complete') {
+        resolve();
+      } else {
+        window.addEventListener('load', resolve, { once: true });
+      }
+    });
+  };
+
+  const runActionWithLock = async (prompt, actionId) => {
+    if (!isValidPrompt(prompt) || !isValidActionId(actionId)) {
+      log.warn('Ignoring malformed action payload');
+      return false;
+    }
+
+    if (processedActionIds.has(actionId)) {
+      log.debug('Action already processed:', actionId);
+      return false;
+    }
+
+    if (inFlightActionIds.has(actionId)) {
+      log.debug('Action already in progress:', actionId);
+      return false;
+    }
+
+    inFlightActionIds.add(actionId);
+
+    try {
+      await waitForDocumentReady();
+      const success = await injectPrompt(prompt, actionId);
+
+      if (success) {
+        processedActionIds.add(actionId);
+      }
+
+      return success;
+    } finally {
+      inFlightActionIds.delete(actionId);
+    }
+  };
+
   const notifyBackground = (type, actionId, error = null) => {
     try {
       chrome.runtime.sendMessage({
@@ -359,11 +423,23 @@
   // ============================================================================
 
   const checkPendingActions = async () => {
+    if (isCheckingPendingActions) {
+      return false;
+    }
+
+    isCheckingPendingActions = true;
+
     try {
       const result = await chrome.storage.local.get(STORAGE_KEY);
       const action = result[STORAGE_KEY];
 
-      if (!action || !action.prompt || !action.id) {
+      if (!action) {
+        return false;
+      }
+
+      if (!isValidStoredAction(action)) {
+        log.warn('Discarding malformed pending action');
+        await chrome.storage.local.remove(STORAGE_KEY);
         return false;
       }
 
@@ -382,32 +458,30 @@
         return false;
       }
 
-      // CLEAR STORAGE FIRST to prevent duplicates
-      await chrome.storage.local.remove(STORAGE_KEY);
-
       log.info('Processing pending action:', action.id, 'age:', age + 'ms');
 
       // Wait for page to be ready
       if (document.readyState !== 'complete') {
         log.debug('Waiting for page to complete loading...');
-        await new Promise((resolve) => {
-          if (document.readyState === 'complete') {
-            resolve();
-          } else {
-            window.addEventListener('load', resolve, { once: true });
-          }
-        });
+        await waitForDocumentReady();
       }
 
       // Additional wait for React/dynamic content
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Inject prompt
-      await injectPrompt(action.prompt, action.id);
-      return true;
+      const success = await runActionWithLock(action.prompt, action.id);
+
+      if (success) {
+        await chrome.storage.local.remove(STORAGE_KEY);
+      }
+
+      return success;
     } catch (error) {
       log.error('Failed to check pending actions:', error);
       return false;
+    } finally {
+      isCheckingPendingActions = false;
     }
   };
 
@@ -420,14 +494,31 @@
       log.info('Received INJECT_PROMPT message:', message.actionId);
 
       (async () => {
-        const success = await injectPrompt(message.prompt, message.actionId);
-        sendResponse({ success });
+        try {
+          const success = await runActionWithLock(message.prompt, message.actionId);
+          sendResponse({ success });
+        } catch (error) {
+          log.error('Failed to handle runtime action:', error);
+          sendResponse({ success: false, error: error.message });
+        }
       })();
 
       return true;
     }
 
     return false;
+  };
+
+  const handleWindowMessage = (event) => {
+    if (!EXTENSION_ORIGIN || event.origin !== EXTENSION_ORIGIN) {
+      return;
+    }
+
+    if (!event.data || event.data.type !== 'ARENA_COMPANION_INJECT_PROMPT') {
+      return;
+    }
+
+    void runActionWithLock(event.data.prompt, event.data.actionId);
   };
 
   // ============================================================================
@@ -490,6 +581,7 @@
 
     // Set up message listener
     chrome.runtime.onMessage.addListener(handleMessage);
+    window.addEventListener('message', handleWindowMessage, false);
 
     // Start aggressive polling immediately
     startPolling();
