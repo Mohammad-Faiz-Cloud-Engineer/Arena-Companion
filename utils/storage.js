@@ -121,7 +121,8 @@ const sanitizeData = (data, depth = 0, visited = new WeakSet()) => {
       // Recursively sanitize with depth tracking and visited set
       sanitized[key] = sanitizeData(data[key], depth + 1, visited);
     }
-    
+
+    visited.delete(data);
     return sanitized;
   }
   
@@ -141,7 +142,11 @@ const validateData = (data) => {
   
   try {
     const stringified = JSON.stringify(data);
-    if (stringified.length > CONFIG.STORAGE.MAX_SIZE_BYTES) {
+    const sizeInBytes = typeof TextEncoder !== 'undefined'
+      ? new TextEncoder().encode(stringified).length
+      : stringified.length;
+
+    if (sizeInBytes > CONFIG.STORAGE.MAX_SIZE_BYTES) {
       logger.warn('Data exceeds recommended storage size');
       return false;
     }
@@ -207,6 +212,10 @@ export const storage = Object.freeze({
       }
       
       const sanitizedItems = sanitizeData(items);
+      if (!sanitizedItems || typeof sanitizedItems !== 'object' || Array.isArray(sanitizedItems)) {
+        throw new Error(ERROR_MESSAGES.INVALID_DATA);
+      }
+
       await chrome.storage.local.set(sanitizedItems);
       logger.debug('Storage write:', Object.keys(sanitizedItems));
     } catch (error) {
