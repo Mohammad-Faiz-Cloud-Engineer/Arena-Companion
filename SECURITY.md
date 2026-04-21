@@ -16,10 +16,10 @@ We take security seriously. The following versions of Arena Companion are curren
 
 Arena Companion implements enterprise-grade security measures:
 
-### 1. Multi-Layer XSS Prevention
-- **5-Layer Sanitization**: Script tag removal, HTML tag stripping, javascript: protocol blocking, event handler removal, dangerous character filtering
+### 1. Input & Injection Safety
+- **Context-Aware Text Insertion**: Prompt text is inserted with `textContent` or form values rather than HTML sinks
 - **Prototype Pollution Prevention**: Blocks `__proto__`, `constructor`, and `prototype` keys in storage operations
-- **Input Validation**: All user inputs are validated and sanitized before processing
+- **Input Validation**: Stored user data and runtime message payloads are validated before processing
 
 ### 2. Data Protection
 - **Sensitive Data Redaction**: Automatic masking of emails, phone numbers, tokens, API keys, and passwords in logs
@@ -28,8 +28,8 @@ Arena Companion implements enterprise-grade security measures:
 - **Length Limits**: Enforced maximum lengths for all string inputs
 
 ### 3. Secure Communication
-- **Content Security Policy**: Strict CSP headers in manifest
-- **Sandbox Attributes**: Iframe sandboxing with minimal required permissions
+- **Content Security Policy**: Restrictive CSP on extension pages
+- **Sandbox Attributes**: Iframe sandboxing with only the permissions needed to render Arena.AI
 - **HTTPS Only**: All external communications use HTTPS
 - **No External Dependencies**: Zero third-party libraries to minimize attack surface
 
@@ -49,7 +49,7 @@ We appreciate responsible disclosure of security vulnerabilities.
 
 Instead, please report security issues via:
 
-1. **Email**: [Your security email - e.g., security@yourdomain.com]
+1. **Private Contact**: Use a verified maintainer contact method (private security advisory, verified repository email, or another non-public channel)
 2. **Subject Line**: "Arena Companion Security Vulnerability"
 3. **Include**:
    - Description of the vulnerability
@@ -109,9 +109,9 @@ Instead, please report security issues via:
 - This is a security feature, not a vulnerability
 
 ### Frame Embedding
-- The extension removes X-Frame-Options headers to embed arena.ai
-- This is done using declarativeNetRequest (the professional, secure method)
-- Only applies to arena.ai domains, not other websites
+- The extension removes frame-blocking headers only for `arena.ai` subframes embedded inside the extension
+- This is done using `declarativeNetRequest`
+- It does not alter the direct website response for ordinary top-level browsing
 
 ### Storage
 - User data is stored locally using chrome.storage.local
@@ -125,9 +125,8 @@ Arena Companion follows:
 - **Chrome Extension Security Best Practices**: Official Google guidelines
 - **WCAG 2.1 AA**: Accessibility compliance
 - **RFC 5322**: Email validation standard
-- 
 ---
 
-**Last Updated**: Apr 8, 2026  
+**Last Updated**: Apr 21, 2026  
 **Version**: 1.4.0  
-**Security Grade**: A+
+**Security Posture**: Reviewed
