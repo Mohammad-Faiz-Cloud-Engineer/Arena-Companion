@@ -10,6 +10,18 @@ import { storage } from './storage.js';
 import { CONFIG, ERROR_MESSAGES } from './constants.js';
 import { logger } from './logger.js';
 
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+/**
+ * Validates email format
+ * @param {string} email - Email address to validate
+ * @returns {boolean} Validation result
+ */
+const validateEmail = (email) => {
+  if (!email || typeof email !== 'string') return true; // Empty is valid
+  return CONFIG.VALIDATION.EMAIL_REGEX.test(email);
+};
+
 /**
  * Validates user details structure
  * @param {Object} details - User details object
@@ -22,8 +34,9 @@ const validateUserDetails = (details) => {
   
   const hasValidName = typeof details.name === 'string' && 
                        details.name.length <= CONFIG.VALIDATION.MAX_NAME_LENGTH;
-  const hasValidEmail = typeof details.email === 'string' && 
-                        details.email.length <= CONFIG.VALIDATION.MAX_EMAIL_LENGTH;
+  const hasValidEmail = typeof details.email === 'string' &&
+                        details.email.length <= CONFIG.VALIDATION.MAX_EMAIL_LENGTH &&
+                        validateEmail(details.email);
   const hasValidLastActive = details.lastActive === null || 
                              (typeof details.lastActive === 'string' && isValidISODate(details.lastActive));
   
@@ -36,18 +49,12 @@ const validateUserDetails = (details) => {
  * @returns {boolean} Validation result
  */
 const isValidISODate = (dateString) => {
-  const date = new Date(dateString);
-  return date instanceof Date && !isNaN(date.getTime());
-};
+  if (typeof dateString !== 'string' || !ISO_DATE_PATTERN.test(dateString)) {
+    return false;
+  }
 
-/**
- * Validates email format
- * @param {string} email - Email address to validate
- * @returns {boolean} Validation result
- */
-const validateEmail = (email) => {
-  if (!email || typeof email !== 'string') return true; // Empty is valid
-  return CONFIG.VALIDATION.EMAIL_REGEX.test(email);
+  const date = new Date(dateString);
+  return date instanceof Date && !Number.isNaN(date.getTime()) && date.toISOString() === dateString;
 };
 
 /**
@@ -150,19 +157,26 @@ export const userDetails = Object.freeze({
    */
   async save(details) {
     try {
-      if (!validateUserDetails(details)) {
+      if (!details || typeof details !== 'object') {
         throw new Error(ERROR_MESSAGES.INVALID_USER_DETAILS);
       }
-      
-      if (details.email && !validateEmail(details.email)) {
+
+      const sanitizedName = sanitizeInput(details.name, CONFIG.VALIDATION.MAX_NAME_LENGTH);
+      const sanitizedEmail = sanitizeInput(details.email, CONFIG.VALIDATION.MAX_EMAIL_LENGTH);
+
+      if (sanitizedEmail && !validateEmail(sanitizedEmail)) {
         throw new Error(ERROR_MESSAGES.INVALID_EMAIL);
       }
-      
+
       const dataToSave = {
-        name: sanitizeInput(details.name, CONFIG.VALIDATION.MAX_NAME_LENGTH),
-        email: sanitizeInput(details.email, CONFIG.VALIDATION.MAX_EMAIL_LENGTH),
+        name: sanitizedName,
+        email: sanitizedEmail,
         lastActive: new Date().toISOString()
       };
+
+      if (!validateUserDetails(dataToSave)) {
+        throw new Error(ERROR_MESSAGES.INVALID_USER_DETAILS);
+      }
       
       await storage.set({
         [CONFIG.STORAGE_KEYS.USER_DETAILS]: dataToSave
