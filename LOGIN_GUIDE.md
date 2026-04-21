@@ -56,15 +56,9 @@ Follow these simple steps:
 └─────────────────────────────────────┘
 ```
 
-### Alternative: Use the Login Button
+### Alternative: Open Arena.AI Manually
 
-The extension also includes a **Login button** (user icon) in the side panel that:
-1. Opens Arena.AI in a new tab automatically
-2. Lets you complete the login process
-3. Automatically refreshes the extension when you're done
-4. Closes the login tab for you
-
-This provides a more streamlined experience!
+If you need a fresh login tab, open **https://arena.ai/** directly in a regular browser tab, complete authentication there, and then refresh the extension side panel.
 
 ### Troubleshooting
 
@@ -73,9 +67,9 @@ This provides a more streamlined experience!
 - **Solution:** Try clearing your browser cache and cookies, then login again
 - **Solution:** Make sure cookies are enabled in Chrome settings
 
-**Problem:** Login button doesn't appear
-- **Solution:** Make sure you're using the latest version of the extension
-- **Solution:** Try reloading the extension from chrome://extensions/
+**Problem:** Need a fresh login tab
+- **Solution:** Open https://arena.ai/ manually in a regular browser tab
+- **Solution:** After logging in there, return to the extension and click refresh
 
 **Problem:** Extension shows "This content is blocked"
 - **Solution:** This is expected when trying to login directly in the iframe
