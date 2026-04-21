@@ -31,7 +31,7 @@ const formatLogArgs = (level, ...args) => {
  * @param {*} data - Data to sanitize
  * @returns {*} Sanitized data
  */
-const sanitizeLogData = (data) => {
+const sanitizeLogData = (data, visited = new WeakSet()) => {
   if (typeof data === 'string') {
     // Mask potential sensitive patterns
     return data
@@ -40,7 +40,18 @@ const sanitizeLogData = (data) => {
       .replace(/\b(?:Bearer|Token)\s+[A-Za-z0-9._-]+/gi, '[TOKEN_REDACTED]')
       .replace(/\b[A-Za-z0-9]{32,}\b/g, '[KEY_REDACTED]');
   }
+  if (data instanceof Error) {
+    return {
+      name: data.name,
+      message: sanitizeLogData(data.message, visited)
+    };
+  }
   if (typeof data === 'object' && data !== null) {
+    if (visited.has(data)) {
+      return '[CIRCULAR]';
+    }
+    visited.add(data);
+
     const sanitized = Array.isArray(data) ? [] : {};
     for (const key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -48,10 +59,11 @@ const sanitizeLogData = (data) => {
         if (/password|token|secret|key|auth/i.test(key)) {
           sanitized[key] = '[REDACTED]';
         } else {
-          sanitized[key] = sanitizeLogData(data[key]);
+          sanitized[key] = sanitizeLogData(data[key], visited);
         }
       }
     }
+    visited.delete(data);
     return sanitized;
   }
   return data;
