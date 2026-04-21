@@ -33,6 +33,15 @@ export const PROMPT_TEMPLATES = Object.freeze({
 });
 
 /**
+ * Arena domain patterns used by the extension
+ * @readonly
+ */
+export const ARENA_HOST_PATTERNS = Object.freeze([
+  'https://arena.ai/*',
+  'https://*.arena.ai/*'
+]);
+
+/**
  * Textarea selectors for Arena.AI input detection
  * Ordered by specificity and likelihood of match
  * @readonly
@@ -118,6 +127,8 @@ export const CONFIG = Object.freeze({
   VALIDATION: Object.freeze({
     MAX_STRING_LENGTH: 10000,
     MAX_SELECTION_LENGTH: 50000,
+    MAX_ACTION_ID_LENGTH: 128,
+    MAX_DOWNLOAD_FILENAME_LENGTH: 240,
     // RFC 5322 compliant email regex (simplified but robust)
     EMAIL_REGEX: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
     MAX_NAME_LENGTH: 255,
