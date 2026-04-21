@@ -53,7 +53,7 @@ Step 3: Return to extension → Click refresh button
 
 ### Using the Extension
 - **Refresh Button:** 🔄 Reload Arena.AI interface
-- **Login Button:** 👤 Opens Arena.AI in new tab for login
+- **Login Flow:** Open https://arena.ai/ in a regular tab first, then return and refresh
 - **Side Panel:** Persists across tabs and windows
 
 ### Why This Login Method?
@@ -71,8 +71,8 @@ Step 3: Return to extension → Click refresh button
 - ✅ Clear browser cache and try again
 - ✅ Check cookies are enabled
 
-### Login Button Not Working?
-- ✅ Use manual method (login on website first)
+### Need a Fresh Login Tab?
+- ✅ Open https://arena.ai/ manually in a regular browser tab
 - ✅ Reload extension from `chrome://extensions/`
 
 ### "Content is Blocked" Error?
@@ -85,7 +85,7 @@ Step 3: Return to extension → Click refresh button
 
 - **Detailed Guide:** See `LOGIN_GUIDE.md`
 - **Full Documentation:** See `README.md`
-- **Technical Details:** See `DOCUMENTATION_UPDATE_SUMMARY.md`
+- **Security Details:** See `SECURITY.md`
 
 ---
 
@@ -96,7 +96,6 @@ Step 3: Return to extension → Click refresh button
 | Open Extension | Click extension icon in toolbar |
 | Refresh | Click 🔄 button (top-right) |
 | Login | Login at https://arena.ai/ first, then refresh |
-| Alternative Login | Click 👤 button (opens new tab) |
 
 ---
 
