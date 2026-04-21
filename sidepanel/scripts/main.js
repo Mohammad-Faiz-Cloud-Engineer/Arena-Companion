@@ -19,9 +19,8 @@ let loadingOverlay = null;
 let refreshBtn = null;
 let loadTimeout = null;
 let refreshDebounceTimer = null;
-
-// Track processed actions to prevent duplicates
-const processedActionIds = new Set();
+let redirectResetTimer = null;
+let eventController = null;
 
 // ============================================================================
 // DOM INITIALIZATION
@@ -64,6 +63,14 @@ const hideLoadingOverlay = () => {
   }, CONFIG.TIMEOUTS.OVERLAY_TRANSITION);
 };
 
+const scheduleLoadTimeout = () => {
+  if (loadTimeout) {
+    clearTimeout(loadTimeout);
+  }
+
+  loadTimeout = setTimeout(hideLoadingOverlay, CONFIG.TIMEOUTS.LOADING_OVERLAY);
+};
+
 /**
  * Shows the loading overlay
  */
@@ -95,6 +102,7 @@ const refreshArenaFrame = () => {
     }
 
     showLoadingOverlay();
+    scheduleLoadTimeout();
     arenaFrame.src = CONFIG.ARENA_URL;
     logger.info('Arena frame refreshed');
 
@@ -137,7 +145,7 @@ const initializeIframe = () => {
   arenaFrame.addEventListener('load', handleIframeLoad, { once: false });
   arenaFrame.addEventListener('error', handleIframeError, { once: false });
 
-  loadTimeout = setTimeout(hideLoadingOverlay, CONFIG.TIMEOUTS.LOADING_OVERLAY);
+  scheduleLoadTimeout();
 };
 
 // ============================================================================
@@ -157,6 +165,7 @@ const forwardToIframe = (prompt, actionId) => {
   }
 
   try {
+    const targetOrigin = new URL(arenaFrame.src || CONFIG.ARENA_URL).origin;
     arenaFrame.contentWindow.postMessage(
       {
         type: 'ARENA_COMPANION_INJECT_PROMPT',
@@ -164,7 +173,7 @@ const forwardToIframe = (prompt, actionId) => {
         actionId,
         timestamp: Date.now()
       },
-      'https://arena.ai'
+      targetOrigin
     );
 
     logger.debug('Prompt forwarded to iframe', { actionId });
@@ -186,13 +195,15 @@ const handleMessage = (message, _sender, sendResponse) => {
   if (message.type === 'INJECT_PROMPT') {
     logger.debug('Received INJECT_PROMPT in sidepanel');
 
-    // Check if already processed
-    if (processedActionIds.has(message.actionId)) {
-      sendResponse({ success: false, reason: 'Already processed' });
+    if (
+      typeof message.prompt !== 'string' ||
+      !message.prompt.trim() ||
+      typeof message.actionId !== 'string'
+    ) {
+      sendResponse({ success: false, reason: 'Invalid payload' });
       return true;
     }
 
-    processedActionIds.add(message.actionId);
     const success = forwardToIframe(message.prompt, message.actionId);
     sendResponse({ success });
     return true;
@@ -208,12 +219,47 @@ const handleMessage = (message, _sender, sendResponse) => {
 let hoverTimer = null;
 let isRedirectMode = false;
 
+const REFRESH_ICON_PATH = 'M13.65 2.35C12.2 0.9 10.21 0 8 0 3.58 0 0.01 3.58 0.01 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L9 7h7V0l-2.35 2.35z';
+const EXTERNAL_LINK_ICON_PATH = 'M9 2L9 3L12.3 3L6 9.3L6.7 10L13 3.7L13 7L14 7L14 2L9 2ZM3 3C2.4 3 2 3.4 2 4L2 13C2 13.6 2.4 14 3 14L12 14C12.6 14 13 13.6 13 13L13 9L12 9L12 13L3 13L3 4L7 4L7 3L3 3Z';
+
+const setRefreshButtonContent = ({ ariaLabel, title, description, pathData }) => {
+  if (!refreshBtn) {
+    return;
+  }
+
+  const svgNamespace = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNamespace, 'svg');
+  svg.setAttribute('width', '14');
+  svg.setAttribute('height', '14');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('aria-hidden', 'true');
+
+  const path = document.createElementNS(svgNamespace, 'path');
+  path.setAttribute('d', pathData);
+  path.setAttribute('fill', 'currentColor');
+  svg.appendChild(path);
+
+  const descriptionSpan = document.createElement('span');
+  descriptionSpan.id = 'refreshDescription';
+  descriptionSpan.className = 'sr-only';
+  descriptionSpan.textContent = description;
+
+  refreshBtn.setAttribute('aria-label', ariaLabel);
+  refreshBtn.setAttribute('title', title);
+  refreshBtn.replaceChildren(svg, descriptionSpan);
+};
+
 /**
  * Opens Arena.AI in a new tab
  */
-const openInNewTab = () => {
-  chrome.tabs.create({ url: CONFIG.ARENA_URL });
-  logger.info('Opened Arena.AI in new tab');
+const openInNewTab = async () => {
+  try {
+    await chrome.tabs.create({ url: CONFIG.ARENA_URL });
+    logger.info('Opened Arena.AI in new tab');
+  } catch (error) {
+    logger.error('Failed to open Arena.AI in new tab', error);
+  }
 };
 
 /**
@@ -224,16 +270,12 @@ const switchToRedirectMode = () => {
   
   isRedirectMode = true;
   refreshBtn.classList.add('redirect-mode');
-  refreshBtn.setAttribute('aria-label', 'Open Arena.AI in new tab');
-  refreshBtn.setAttribute('title', 'Open in new tab');
-  
-  // Update SVG icon to external link icon
-  refreshBtn.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M9 2L9 3L12.3 3L6 9.3L6.7 10L13 3.7L13 7L14 7L14 2L9 2ZM3 3C2.4 3 2 3.4 2 4L2 13C2 13.6 2.4 14 3 14L12 14C12.6 14 13 13.6 13 13L13 9L12 9L12 13L3 13L3 4L7 4L7 3L3 3Z" fill="currentColor"/>
-    </svg>
-    <span id="refreshDescription" class="sr-only">Click to open Arena.AI in new tab</span>
-  `;
+  setRefreshButtonContent({
+    ariaLabel: 'Open Arena.AI in new tab',
+    title: 'Open in new tab',
+    description: 'Click to open Arena.AI in new tab',
+    pathData: EXTERNAL_LINK_ICON_PATH
+  });
   
   logger.debug('Switched to redirect mode');
 };
@@ -246,16 +288,12 @@ const switchToRefreshMode = () => {
   
   isRedirectMode = false;
   refreshBtn.classList.remove('redirect-mode');
-  refreshBtn.setAttribute('aria-label', 'Refresh Arena Companion');
-  refreshBtn.setAttribute('title', 'Refresh');
-  
-  // Restore refresh icon
-  refreshBtn.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M13.65 2.35C12.2 0.9 10.21 0 8 0 3.58 0 0.01 3.58 0.01 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L9 7h7V0l-2.35 2.35z" fill="currentColor"/>
-    </svg>
-    <span id="refreshDescription" class="sr-only">Click to reload Arena AI interface</span>
-  `;
+  setRefreshButtonContent({
+    ariaLabel: 'Refresh Arena Companion',
+    title: 'Refresh',
+    description: 'Click to reload Arena AI interface',
+    pathData: REFRESH_ICON_PATH
+  });
   
   logger.debug('Switched to refresh mode');
 };
@@ -265,10 +303,39 @@ const switchToRefreshMode = () => {
  */
 const handleButtonClick = () => {
   if (isRedirectMode) {
-    openInNewTab();
+    void openInNewTab();
   } else {
     refreshArenaFrame();
   }
+};
+
+const handleRefreshButtonKeydown = (event) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    handleButtonClick();
+  }
+};
+
+const handleRefreshButtonMouseEnter = () => {
+  hoverTimer = setTimeout(() => {
+    switchToRedirectMode();
+  }, 1000);
+};
+
+const handleRefreshButtonMouseLeave = () => {
+  if (hoverTimer) {
+    clearTimeout(hoverTimer);
+    hoverTimer = null;
+  }
+
+  if (redirectResetTimer) {
+    clearTimeout(redirectResetTimer);
+  }
+
+  redirectResetTimer = setTimeout(() => {
+    switchToRefreshMode();
+    redirectResetTimer = null;
+  }, 300);
 };
 
 /**
@@ -277,40 +344,24 @@ const handleButtonClick = () => {
 const initializeRefreshButton = () => {
   if (!refreshBtn) return;
 
+  if (!eventController) {
+    eventController = new AbortController();
+  }
+
+  const { signal } = eventController;
+  switchToRefreshMode();
+
   // Click handler
-  refreshBtn.addEventListener('click', handleButtonClick, { passive: true });
+  refreshBtn.addEventListener('click', handleButtonClick, { passive: true, signal });
 
   // Keyboard support
-  refreshBtn.addEventListener(
-    'keydown',
-    (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        handleButtonClick();
-      }
-    },
-    { passive: false }
-  );
+  refreshBtn.addEventListener('keydown', handleRefreshButtonKeydown, { passive: false, signal });
 
   // Hover to switch to redirect mode (after 1 second)
-  refreshBtn.addEventListener('mouseenter', () => {
-    hoverTimer = setTimeout(() => {
-      switchToRedirectMode();
-    }, 1000); // 1 second hover delay
-  });
+  refreshBtn.addEventListener('mouseenter', handleRefreshButtonMouseEnter, { signal });
 
   // Mouse leave - cancel timer or switch back
-  refreshBtn.addEventListener('mouseleave', () => {
-    if (hoverTimer) {
-      clearTimeout(hoverTimer);
-      hoverTimer = null;
-    }
-    
-    // Switch back to refresh mode after a short delay
-    setTimeout(() => {
-      switchToRefreshMode();
-    }, 300);
-  });
+  refreshBtn.addEventListener('mouseleave', handleRefreshButtonMouseLeave, { signal });
 };
 
 // ============================================================================
@@ -340,20 +391,30 @@ const handleVisibilityChange = () => {
  * Cleanup function for event listeners
  */
 const cleanup = () => {
+  if (eventController) {
+    eventController.abort();
+    eventController = null;
+  }
   if (arenaFrame) {
     arenaFrame.removeEventListener('load', handleIframeLoad);
     arenaFrame.removeEventListener('error', handleIframeError);
   }
-  if (refreshBtn) {
-    refreshBtn.removeEventListener('click', refreshArenaFrame);
-  }
   if (loadTimeout) {
     clearTimeout(loadTimeout);
+    loadTimeout = null;
   }
   if (refreshDebounceTimer) {
     clearTimeout(refreshDebounceTimer);
+    refreshDebounceTimer = null;
   }
-  document.removeEventListener('visibilitychange', handleVisibilityChange);
+  if (hoverTimer) {
+    clearTimeout(hoverTimer);
+    hoverTimer = null;
+  }
+  if (redirectResetTimer) {
+    clearTimeout(redirectResetTimer);
+    redirectResetTimer = null;
+  }
   chrome.runtime.onMessage.removeListener(handleMessage);
 };
 
@@ -378,7 +439,8 @@ const initialize = async () => {
 
     // Listen for visibility changes
     document.addEventListener('visibilitychange', handleVisibilityChange, {
-      passive: true
+      passive: true,
+      signal: eventController.signal
     });
 
     // Initial user activity update
@@ -401,16 +463,3 @@ if (document.readyState === 'loading') {
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', cleanup, { once: true });
-
-// Clean up processed action IDs periodically to prevent memory leaks
-setInterval(() => {
-  const MAX_IDS = 100;
-  const KEEP_IDS = 50;
-  
-  if (processedActionIds.size > MAX_IDS) {
-    const idsToKeep = Array.from(processedActionIds).slice(-KEEP_IDS);
-    processedActionIds.clear();
-    idsToKeep.forEach((id) => processedActionIds.add(id));
-    logger.debug('Cleaned up processed action IDs');
-  }
-}, 60000);
