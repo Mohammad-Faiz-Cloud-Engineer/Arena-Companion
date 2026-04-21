@@ -5,6 +5,16 @@ All notable changes to Arena Companion will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-04-21
+
+### Fixed
+- Scoped Arena host access to `arena.ai` domains and removed the unused `scripting` permission
+- Limited header stripping rules to embedded Arena subframes instead of all top-level Arena navigations
+- Prevented dropped prompt actions by retrying failed injections instead of marking them processed early
+- Tightened side panel cleanup so timers and event listeners are released correctly on unload
+- Hardened logger and storage sanitization against circular references and inaccurate size checks
+- Corrected documentation links and login guidance to match the current UI behavior
+
 ## [1.4.0] - 2026-04-09
 
 ### Changed
