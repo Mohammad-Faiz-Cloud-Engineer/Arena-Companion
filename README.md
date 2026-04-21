@@ -3,13 +3,13 @@
 **Version:** 1.4.0
 
 [![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/Mohammad-Faiz-Cloud-Engineer/arena-companion/releases)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-BSD--2--Clause-green.svg)](LICENSE)
 [![Chrome](https://img.shields.io/badge/chrome-114%2B-brightgreen.svg)](https://www.google.com/chrome/)
 [![Manifest](https://img.shields.io/badge/manifest-v3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
-[![Security](https://img.shields.io/badge/security-A%2B-success.svg)](RELEASE_v1.1.0.md)
-[![Performance](https://img.shields.io/badge/performance-A%2B-success.svg)](RELEASE_v1.1.0.md)
+[![Security](https://img.shields.io/badge/security-reviewed-success.svg)](SECURITY.md)
+[![Performance](https://img.shields.io/badge/performance-optimized-success.svg)](#performance)
 
-A production-grade Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in your browser's side panel with enterprise security, optimized performance, and corporate-grade code quality.
+A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in your browser's side panel with hardened defaults, optimized performance, and a small runtime footprint.
 
 ## Author
 
@@ -19,14 +19,14 @@ A production-grade Chrome Extension for seamless [Arena.AI](https://arena.ai/) i
 
 - **Text Selection Actions**: Right-click any text to Summarize, Explain, Rewrite, Quiz Me, or Proofread
 - **Modern Side Panel API**: Utilizes Chrome's native `chrome.sidePanel` API
-- **Enterprise Security (A+ Grade)**: Multi-layer XSS prevention, sensitive data redaction, RFC-compliant validation
-- **Performance Optimized (+60%)**: GPU-accelerated animations, CSS containment, non-blocking operations
-- **Header Stripping**: Professional `declarativeNetRequest` implementation to bypass X-Frame-Options
+- **Hardened Security Defaults**: Restricted permissions, sandboxed framing, validated storage, and redacted logs
+- **Performance Optimized**: CSS containment, debounced interactions, and non-blocking operations
+- **Scoped Header Stripping**: `declarativeNetRequest` rules limited to embedded Arena subframes
 - **Modular Architecture**: Clean separation of concerns with utils, storage, and UI modules
 - **Production-Ready**: Comprehensive error handling, data sanitization, and logging
 - **Zero Dependencies**: Pure Vanilla JS, HTML5, and CSS3
-- **Full Accessibility**: WCAG 2.1 AA compliant with keyboard navigation
-- **Memory Efficient**: < 5MB footprint with proper cleanup
+- **Keyboard-Friendly Controls**: Refresh interaction supports keyboard activation
+- **Lean Runtime**: Minimal background work with explicit cleanup paths
 - **Dark Mode Support**: Automatic theme adaptation based on system preferences
 
 ## Architecture
@@ -37,6 +37,9 @@ A production-grade Chrome Extension for seamless [Arena.AI](https://arena.ai/) i
 ├── icons/                     # Extension icons
 ├── background/
 │   └── service-worker.js      # Background service worker
+├── content/
+│   ├── content-script.js      # Arena page automation
+│   └── content-style.css      # Arena page cleanup styles
 ├── sidepanel/
 │   ├── sidepanel.html         # Side panel UI
 │   ├── scripts/
@@ -91,25 +94,25 @@ A production-grade Chrome Extension for seamless [Arena.AI](https://arena.ai/) i
 - This is a standard security measure to prevent clickjacking attacks
 - Your login session is shared between the website and the extension once authenticated
 
-**Alternative:** You can also use the **Login button** in the side panel, which will open Arena.AI in a new tab for authentication, then automatically refresh the extension after you complete the login.
+**Alternative:** Open [https://arena.ai/](https://arena.ai/) manually in a regular browser tab whenever you need to re-authenticate, then return to the side panel and refresh it.
 
 ## Technical Details
 
 ### Header Stripping
 
-The extension uses `declarativeNetRequest` to remove frame-blocking headers:
+The extension uses `declarativeNetRequest` to remove frame-blocking headers from Arena subframes loaded inside the extension:
 - `X-Frame-Options`
 - `Content-Security-Policy`
 - `Frame-Options`
 
-This is the professional, security-compliant method for embedding third-party sites.
+This rule is limited to `arena.ai` subframes so the direct website keeps its normal protections outside the extension.
 
 ### Storage Management
 
 User details and preferences are stored using `chrome.storage.local` with:
 - Professional error handling
-- Data sanitization to prevent XSS
 - Validation before storage operations
+- Sensible length limits
 - Automatic timestamp tracking
 
 ### Performance
@@ -122,16 +125,14 @@ User details and preferences are stored using `chrome.storage.local` with:
 ## Code Quality
 
 - ✅ ES6+ modern JavaScript (const/let, async/await)
-- ✅ 100% JSDoc documentation coverage
-- ✅ Comprehensive try/catch blocks
-- ✅ Professional error handling
-- ✅ Multi-layer data sanitization and validation
+- ✅ Focused modules with explicit responsibilities
+- ✅ Defensive error handling in runtime entry points
+- ✅ Input validation for persisted user data
 - ✅ Immutable module exports with Object.freeze()
 - ✅ Modular architecture with clean separation
 - ✅ Developer-friendly comments
 - ✅ Production logging system with debug levels
-- ✅ WCAG 2.1 AA accessibility compliant
-- ✅ Zero technical debt
+- ✅ Keyboard-accessible refresh control
 
 ## Browser Compatibility
 
@@ -141,13 +142,12 @@ User details and preferences are stored using `chrome.storage.local` with:
 
 - Microsoft Edge users: install from Microsoft Edge Add-ons — [Arena Companion on Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/arena-companion/hfpllffcikhjbhfmiiaacenmegimognh)
 
-## Performance Metrics
+## Performance
 
-- Initial load: < 100ms
-- Refresh action: < 50ms
-- Storage operations: < 10ms
-- Memory footprint: < 5MB
-- Security grade: A+
+- Low-overhead background service worker architecture
+- Debounced refresh interaction to prevent accidental reload storms
+- Scoped message delivery to Arena tabs in the active window
+- Cleanup paths for iframe and DOM listeners in the side panel
 
 ## License
 
