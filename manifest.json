@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Arena Companion",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Access Arena.AI directly from your browser's side panel for quick AI assistance while browsing",
   "author": "Mohammad Faiz",
   "icons": {
