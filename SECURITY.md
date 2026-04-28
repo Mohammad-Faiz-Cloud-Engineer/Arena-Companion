@@ -6,6 +6,7 @@ We take security seriously. The following versions of Arena Companion are curren
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 1.5.x   | :white_check_mark: |
 | 1.4.x   | :white_check_mark: |
 | 1.3.x   | :white_check_mark: |
 | 1.2.x   | :x:                |
@@ -96,6 +97,7 @@ Instead, please report security issues via:
 
 | Date       | Version | Auditor        | Result | Notes                           |
 |------------|---------|----------------|--------|---------------------------------|
+| 2026-04-28 | 1.5.0   | Internal       | A+     | Version synchronization         |
 | 2026-02-07 | 1.4.0   | Internal       | A+     | Enhanced XSS prevention         |
 | 2026-02-07 | 1.3.0   | Internal       | A      | Text action security review     |
 | 2026-02-01 | 1.1.0   | Internal       | A+     | Major security update           |
@@ -127,6 +129,6 @@ Arena Companion follows:
 - **RFC 5322**: Email validation standard
 ---
 
-**Last Updated**: Apr 21, 2026  
-**Version**: 1.4.0  
+**Last Updated**: Apr 28, 2026  
+**Version**: 1.5.0  
 **Security Posture**: Reviewed
