@@ -3,7 +3,7 @@
  * Handles user data with error handling and validation
  * @module user-details
  * @author Mohammad Faiz
- * @version 1.4.0
+ * @version 1.5.0
  */
 
 import { storage } from './storage.js';
