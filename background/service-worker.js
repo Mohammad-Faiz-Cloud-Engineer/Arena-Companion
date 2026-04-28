@@ -3,7 +3,7 @@
  * Handles extension lifecycle, side panel management, and text selection actions
  * @module service-worker
  * @author Mohammad Faiz
- * @version 1.4.0
+ * @version 1.5.0
  */
 
 import { logger } from '../utils/logger.js';
@@ -651,4 +651,4 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // Recreate context menus on startup
 createContextMenus();
 
-logger.info('Service worker initialized v1.4.0');
+logger.info('Service worker initialized v1.5.0');
