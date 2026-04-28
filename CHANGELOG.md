@@ -5,7 +5,11 @@ All notable changes to Arena Companion will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-04-21
+## [1.5.0]] - 2026-04-28
+
+### Changed
+- **Version Bump**: Updated version to 1.5.0 across all files
+- All module versions synchronized to 1.5.0
 
 ### Fixed
 - Scoped Arena host access to `arena.ai` domains and removed the unused `scripting` permission
