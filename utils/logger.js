@@ -3,7 +3,7 @@
  * Conditional logging based on environment with performance optimization
  * @module logger
  * @author Mohammad Faiz
- * @version 1.4.0
+ * @version 1.5.0
  */
 
 const IS_PRODUCTION = (() => {
