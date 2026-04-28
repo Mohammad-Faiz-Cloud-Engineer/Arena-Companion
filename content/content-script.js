@@ -3,7 +3,7 @@
  * Handles UI cleanup and prompt injection for Arena.AI
  * @module content-script
  * @author Mohammad Faiz
- * @version 1.4.0
+ * @version 1.5.0
  */
 
 (() => {
@@ -569,7 +569,7 @@
   // ============================================================================
 
   const initialize = () => {
-    log.info('Content script initializing v1.4.0 on:', window.location.href);
+    log.info('Content script initializing v1.5.0 on:', window.location.href);
 
     // Store init time
     initStartTime = Date.now();
