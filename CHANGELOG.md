@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.1] - 2026-02-07
 
-### 🔒 Security Hardening & Code Quality Update
+### Security Hardening & Code Quality Update
 
 ### Enhanced
 - **Multi-Layer XSS Prevention**
@@ -193,11 +193,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Manifest**: Added minimum Chrome version requirement (114+)
 
 ### Improved
-- Initial load time: ~150ms → < 100ms (33% faster)
-- Refresh action: ~80ms → < 50ms (38% faster)
-- Storage operations: ~15ms → < 10ms (33% faster)
-- Memory usage: ~7MB → < 5MB (29% reduction)
-- Security grade: B+ → A+
+- Initial load time: ~150ms -> < 100ms (33% faster)
+- Refresh action: ~80ms -> < 50ms (38% faster)
+- Storage operations: ~15ms -> < 10ms (33% faster)
+- Memory usage: ~7MB -> < 5MB (29% reduction)
+- Security grade: B+ -> A+
 
 ### Fixed
 - Potential memory leaks in event listeners
@@ -239,4 +239,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 **Arena Companion** - Enterprise-Grade Side-Panel AI Agent  
-*Crafted with ❤️ by Mohammad Faiz*
+*Crafted by Mohammad Faiz*

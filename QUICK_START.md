@@ -1,6 +1,6 @@
 # Arena Companion - Quick Start Guide
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Installation
 1. Load extension in Chrome (`chrome://extensions/`)
@@ -14,21 +14,21 @@
 
 ---
 
-## 🔐 How to Login (Important!)
+## How to Login (Important!)
 
-### ⚠️ Cannot Login Directly in Extension
+### Cannot Login Directly in Extension
 Due to security restrictions, you **cannot** login directly within the extension's iframe.
 
-### ✅ Simple 3-Step Login Process
+### Simple 3-Step Login Process
 
 ```
 Step 1: Open https://arena.ai/ in a new tab
-   ↓
+   v
 Step 2: Login on the website (Google OAuth)
-   ↓
-Step 3: Return to extension → Click refresh button
-   ↓
-✅ You're logged in!
+   v
+Step 3: Return to extension -> Click refresh button
+   v
+You're logged in!
 ```
 
 ### Detailed Steps:
@@ -44,44 +44,44 @@ Step 3: Return to extension → Click refresh button
 
 **3. Sync Extension**
 - Return to Arena Companion side panel
-- Click the **refresh button** (🔄 top-right corner)
+- Click the **refresh button** (top-right corner)
 - Extension now shows you logged in!
 
 ---
 
-## 🎯 Quick Tips
+## Quick Tips
 
 ### Using the Extension
-- **Refresh Button:** 🔄 Reload Arena.AI interface
+- **Refresh Button:** Reload Arena.AI interface
 - **Login Flow:** Open https://arena.ai/ in a regular tab first, then return and refresh
 - **Side Panel:** Persists across tabs and windows
 
 ### Why This Login Method?
-- ✅ **Security:** Prevents clickjacking attacks
-- ✅ **OAuth Compliance:** Follows Google's security requirements
-- ✅ **Session Sharing:** Chrome shares cookies between website and extension
-- ✅ **Standard Practice:** Used by many professional extensions
+- **Security:** Prevents clickjacking attacks
+- **OAuth Compliance:** Follows Google's security requirements
+- **Session Sharing:** Chrome shares cookies between website and extension
+- **Standard Practice:** Used by many professional extensions
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Not Logged In After Refresh?
-- ✅ Verify you logged in at **https://arena.ai/** (exact URL)
-- ✅ Clear browser cache and try again
-- ✅ Check cookies are enabled
+- Verify you logged in at **https://arena.ai/** (exact URL)
+- Clear browser cache and try again
+- Check cookies are enabled
 
 ### Need a Fresh Login Tab?
-- ✅ Open https://arena.ai/ manually in a regular browser tab
-- ✅ Reload extension from `chrome://extensions/`
+- Open https://arena.ai/ manually in a regular browser tab
+- Reload extension from `chrome://extensions/`
 
 ### "Content is Blocked" Error?
-- ✅ This is expected when trying to login in iframe
-- ✅ Follow the 3-step process above instead
+- This is expected when trying to login in iframe
+- Follow the 3-step process above instead
 
 ---
 
-## 📚 More Help
+## More Help
 
 - **Detailed Guide:** See `LOGIN_GUIDE.md`
 - **Full Documentation:** See `README.md`
@@ -89,22 +89,22 @@ Step 3: Return to extension → Click refresh button
 
 ---
 
-## ⚡ Quick Reference
+## Quick Reference
 
 | Action | How To |
 |--------|--------|
 | Open Extension | Click extension icon in toolbar |
-| Refresh | Click 🔄 button (top-right) |
+| Refresh | Click refresh button (top-right) |
 | Login | Login at https://arena.ai/ first, then refresh |
 
 ---
 
-## 🎉 You're All Set!
+## You're All Set!
 
 Once logged in, your session persists across:
-- ✅ Browser tabs
-- ✅ Browser windows  
-- ✅ Browser restarts (until you logout)
+- Browser tabs
+- Browser windows  
+- Browser restarts (until you logout)
 
 **Enjoy using Arena Companion!**
 

@@ -365,11 +365,7 @@
     }
 
     await new Promise((resolve) => {
-      if (document.readyState === 'complete') {
-        resolve();
-      } else {
-        window.addEventListener('load', resolve, { once: true });
-      }
+      window.addEventListener('load', resolve, { once: true });
     });
   };
 
@@ -594,7 +590,7 @@
 
   // Initialize based on document state
   if (document.readyState === 'loading') {
-    // Defer to initialize() which starts polling — avoid duplicate intervals
+    // Defer to initialize() which starts polling - avoid duplicate intervals
     document.addEventListener('DOMContentLoaded', initialize, { once: true });
   } else {
     initialize();

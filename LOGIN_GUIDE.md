@@ -10,7 +10,7 @@ You may notice that clicking login buttons directly within the extension's side 
 - **Content Security Policy**: This is a standard security measure to prevent clickjacking attacks
 - **Browser Protection**: Chrome enforces these restrictions to keep your accounts safe
 
-### ✅ Solution: Login via Website First
+### Solution: Login via Website First
 
 Follow these simple steps:
 
@@ -36,24 +36,24 @@ Follow these simple steps:
 ### Visual Guide
 
 ```
-┌─────────────────────────────────────┐
-│  Step 1: Open https://arena.ai/    │
-│  in a regular browser tab           │
-└─────────────────────────────────────┘
-              ↓
-┌─────────────────────────────────────┐
-│  Step 2: Complete login on website │
-│  (Google OAuth or other method)     │
-└─────────────────────────────────────┘
-              ↓
-┌─────────────────────────────────────┐
-│  Step 3: Return to extension and   │
-│  click the refresh button           │
-└─────────────────────────────────────┘
-              ↓
-┌─────────────────────────────────────┐
-│  ✅ You're now logged in!           │
-└─────────────────────────────────────┘
++-------------------------------------+
+|  Step 1: Open https://arena.ai/    |
+|  in a regular browser tab           |
++-------------------------------------+
+              v
++-------------------------------------+
+|  Step 2: Complete login on website  |
+|  (Google OAuth or other method)     |
++-------------------------------------+
+              v
++-------------------------------------+
+|  Step 3: Return to extension and   |
+|  click the refresh button           |
++-------------------------------------+
+              v
++-------------------------------------+
+|  You're now logged in!              |
++-------------------------------------+
 ```
 
 ### Alternative: Open Arena.AI Manually
@@ -78,10 +78,10 @@ If you need a fresh login tab, open **https://arena.ai/** directly in a regular 
 ### Security Note
 
 This approach is actually **more secure** than allowing login within an iframe because:
-- ✅ Prevents clickjacking attacks
-- ✅ Ensures you're on the real Arena.AI website
-- ✅ Protects your Google account credentials
-- ✅ Follows OAuth security best practices
+- Prevents clickjacking attacks
+- Ensures you're on the real Arena.AI website
+- Protects your Google account credentials
+- Follows OAuth security best practices
 
 ### Need Help?
 

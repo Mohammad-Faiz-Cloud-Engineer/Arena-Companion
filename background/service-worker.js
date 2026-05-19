@@ -495,10 +495,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       windowId: tab?.windowId
     };
 
-      if (!isValidTabId(tabInfo.tabId) && !isValidWindowId(tabInfo.windowId)) {
-        logger.error(ERROR_MESSAGES.INVALID_TAB);
-        return;
-      }
+    if (!isValidTabId(tabInfo.tabId) && !isValidWindowId(tabInfo.windowId)) {
+      logger.error(ERROR_MESSAGES.INVALID_TAB);
+      return;
+    }
 
     const { menuItemId, selectionText } = info;
 

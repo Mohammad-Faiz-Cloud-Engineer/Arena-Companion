@@ -90,7 +90,7 @@ cd arena-companion
 #### Code Quality
 
 ```javascript
-// ✅ GOOD
+// GOOD
 const getUserDetails = async () => {
   try {
     const result = await storage.get(CONFIG.STORAGE_KEYS.USER_DETAILS);
@@ -101,7 +101,7 @@ const getUserDetails = async () => {
   }
 };
 
-// ❌ BAD
+// BAD
 function gUD() {
   var r = storage.get('user');
   return r;
@@ -132,7 +132,7 @@ const getUserDetails = async (userId) => {
 - **Attributes**: Use double quotes
 
 ```html
-<!-- ✅ GOOD -->
+<!-- GOOD -->
 <button 
   id="refreshBtn" 
   aria-label="Refresh Arena Companion" 
@@ -140,7 +140,7 @@ const getUserDetails = async (userId) => {
   Refresh
 </button>
 
-<!-- ❌ BAD -->
+<!-- BAD -->
 <div onclick="refresh()">Refresh</div>
 ```
 
@@ -152,7 +152,7 @@ const getUserDetails = async (userId) => {
 - **Organization**: Group related properties
 
 ```css
-/* ✅ GOOD */
+/* GOOD */
 :root {
   --color-primary: #1a73e8;
   --spacing-md: 16px;
@@ -165,7 +165,7 @@ const getUserDetails = async (userId) => {
   background-color: var(--color-primary);
 }
 
-/* ❌ BAD */
+/* BAD */
 button {
   display: flex;
   background: blue;

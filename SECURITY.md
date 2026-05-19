@@ -6,12 +6,12 @@ We take security seriously. The following versions of Arena Companion are curren
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.5.x   | :white_check_mark: |
-| 1.4.x   | :white_check_mark: |
-| 1.3.x   | :white_check_mark: |
-| 1.2.x   | :x:                |
-| 1.1.x   | :x:                |
-| < 1.1   | :x:                |
+| 1.5.x   | Yes |
+| 1.4.x   | Yes |
+| 1.3.x   | Yes |
+| 1.2.x   | No  |
+| 1.1.x   | No  |
+| < 1.1   | No  |
 
 ## Security Features
 
