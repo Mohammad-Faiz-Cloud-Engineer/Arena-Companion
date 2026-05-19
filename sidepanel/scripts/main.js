@@ -142,8 +142,8 @@ const handleIframeError = (error) => {
 const initializeIframe = () => {
   if (!arenaFrame) return;
 
-  arenaFrame.addEventListener('load', handleIframeLoad, { once: false });
-  arenaFrame.addEventListener('error', handleIframeError, { once: false });
+  arenaFrame.addEventListener('load', handleIframeLoad);
+  arenaFrame.addEventListener('error', handleIframeError);
 
   scheduleLoadTimeout();
 };
@@ -317,6 +317,10 @@ const handleRefreshButtonKeydown = (event) => {
 };
 
 const handleRefreshButtonMouseEnter = () => {
+  if (redirectResetTimer) {
+    clearTimeout(redirectResetTimer);
+    redirectResetTimer = null;
+  }
   hoverTimer = setTimeout(() => {
     switchToRedirectMode();
   }, 1000);

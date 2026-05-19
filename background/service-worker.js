@@ -348,7 +348,7 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
     });
 
     // Cleanup listener and timeouts after max delay
-    setTimeout(() => {
+    const cleanupTimeoutId = setTimeout(() => {
       if (injectionListener) {
         chrome.runtime.onMessage.removeListener(injectionListener);
         injectionListener = null;
@@ -357,6 +357,7 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
       broadcastTimeouts.forEach(clearTimeout);
       broadcastTimeouts.length = 0;
     }, 6000);
+    broadcastTimeouts.push(cleanupTimeoutId);
 
     await userDetails.updateLastVisit().catch((err) =>
       logger.debug('Failed to update last visit', err)

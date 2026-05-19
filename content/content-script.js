@@ -602,11 +602,11 @@
     checkPendingActions();
   }, { once: true });
 
+  const MAX_IDS = 100;
+  const KEEP_IDS = 50;
+
   // Clean up processed action IDs periodically to prevent memory leaks
   setInterval(() => {
-    const MAX_IDS = 100;
-    const KEEP_IDS = 50;
-    
     if (processedActionIds.size > MAX_IDS) {
       const idsToKeep = Array.from(processedActionIds).slice(-KEEP_IDS);
       processedActionIds.clear();
