@@ -35,7 +35,7 @@ const sanitizeLogData = (data, visited = new WeakSet()) => {
   if (typeof data === 'string') {
     // Mask potential sensitive patterns
     return data
-      .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]')
+      .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '[EMAIL_REDACTED]')
       .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE_REDACTED]')
       .replace(/\b(?:Bearer|Token)\s+[A-Za-z0-9._-]+/gi, '[TOKEN_REDACTED]')
       .replace(/\b[A-Za-z0-9]{32,}\b/g, '[KEY_REDACTED]');

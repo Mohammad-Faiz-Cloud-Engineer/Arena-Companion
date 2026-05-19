@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](https://github.com/Mohammad-Faiz-Cloud-Engineer/arena-companion/releases)
 [![License](https://img.shields.io/badge/license-BSD--2--Clause-green.svg)](LICENSE)
-[![Chrome](https://img.shields.io/badge/chrome-114%2B-brightgreen.svg)](https://www.google.com/chrome/)
+[![Chrome](https://img.shields.io/badge/chrome-116%2B-brightgreen.svg)](https://www.google.com/chrome/)
 [![Manifest](https://img.shields.io/badge/manifest-v3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![Security](https://img.shields.io/badge/security-reviewed-success.svg)](SECURITY.md)
 [![Performance](https://img.shields.io/badge/performance-optimized-success.svg)](#performance)
@@ -80,7 +80,7 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 
 ### How to Login
 
-**Important:** Due to OAuth security restrictions, you cannot login directly within the extension's iframe.
+**Important:** Due to OAuth security restrictions, you cannot log in directly within the extension's iframe.
 
 **Login Steps:**
 1. Open [https://arena.ai/](https://arena.ai/) in a regular browser tab
@@ -136,8 +136,8 @@ User details and preferences are stored using `chrome.storage.local` with:
 
 ## Browser Compatibility
 
-- Chrome 114+
-- Edge 114+
+- Chrome 116+
+- Edge 116+
 - Any Chromium-based browser with Manifest V3 support
 
 - Microsoft Edge users: install from Microsoft Edge Add-ons - [Arena Companion on Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/arena-companion/hfpllffcikhjbhfmiiaacenmegimognh)

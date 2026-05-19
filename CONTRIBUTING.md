@@ -34,7 +34,7 @@ Thank you for your interest in contributing to Arena Companion! This document pr
 
 ### Prerequisites
 
-- Google Chrome 114+ or any Chromium-based browser
+- Google Chrome 116+ or any Chromium-based browser
 - Basic knowledge of JavaScript (ES6+), HTML5, and CSS3
 - Understanding of Chrome Extension APIs
 - Git for version control
@@ -255,7 +255,7 @@ Brief description of what this PR does
 - [ ] Security improvement
 
 ## Testing
-- [ ] Tested in Chrome 114+
+- [ ] Tested in Chrome 116+
 - [ ] No console errors
 - [ ] All features working as expected
 
@@ -299,8 +299,8 @@ Closes #123
 ### Browser Testing
 
 Test in:
-- Chrome 114+
-- Microsoft Edge 114+
+- Chrome 116+
+- Microsoft Edge 116+
 - Other Chromium-based browsers (optional)
 
 ### Performance Testing

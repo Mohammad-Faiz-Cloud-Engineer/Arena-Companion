@@ -14,6 +14,7 @@
   // ============================================================================
 
   const STYLE_ID = 'arena-companion-cleanup';
+  // Must stay in sync with ACTION_STORAGE_KEYS.PENDING_ACTION in utils/constants.js
   const STORAGE_KEY = 'arena_companion_pending_action';
   const POLL_INTERVAL = 300; // 300ms - Balance between responsiveness and CPU usage
   const INITIAL_POLL_INTERVAL = 100; // 100ms - Aggressive initial polling for fast injection
@@ -71,6 +72,7 @@
     try {
       return new URL(chrome.runtime.getURL('')).origin;
     } catch {
+      log.warn('Could not determine extension origin; window message forwarding disabled');
       return null;
     }
   })();

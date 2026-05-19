@@ -50,5 +50,5 @@
   "action": {
     "default_title": "Open Arena Companion"
   },
-  "minimum_chrome_version": "114"
+  "minimum_chrome_version": "116"
 }

@@ -69,7 +69,6 @@ export const CONFIG = Object.freeze({
   TIMEOUTS: Object.freeze({
     LOADING_OVERLAY: 5000,
     OVERLAY_TRANSITION: 200,
-    DEBOUNCE_DELAY: 300,
     RETRY_DELAY: 500,
     MAX_RETRY_ATTEMPTS: 5
   }),

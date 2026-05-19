@@ -86,7 +86,7 @@ This approach is actually **more secure** than allowing login within an iframe b
 ### Need Help?
 
 If you continue to experience issues:
-1. Check that you're using Chrome 114 or later
+1. Check that you're using Chrome 116 or later
 2. Verify the extension has proper permissions
 3. Try disabling other extensions that might interfere
 4. Open the browser console (F12) and check for error messages
