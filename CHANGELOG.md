@@ -5,6 +5,33 @@ All notable changes to Arena Companion will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-05-19
+
+### Changed
+- **Bumped version to 1.6.0** across all modules and docs
+- Stripped out emojis, em dashes, and Unicode arrows that had snuck into markdown files
+- Cleaned up `constants.js` by removing 14 unused exports that were dead weight
+- Simplified `content-style.css` — `display: none` does the job, the rest was overkill
+
+### Fixed
+- **Wrong minimum Chrome version**: bumped from 114 to 116. `chrome.sidePanel.open()` doesn't exist in 114 or 115, so the extension was broken on those versions.
+- **Invalid CSS**: `font-display: swap` on the `body` tag does nothing outside `@font-face`. Removed it.
+- **Regex bug**: stray pipe `|` in the email TLD character class in `logger.js` — harmless for redaction but not what was intended.
+- **Race condition**: hovering the refresh button, then re-entering within 300ms caused a visual flicker because the reset timer was never cleared on re-entry.
+- **Dead code path**: `waitForDocumentReady` had an unreachable `readyState` check inside a Promise executor.
+- **Indentation**: mismatched spacing in `service-worker.js` around the tab validation block.
+- **Silent failure**: if `chrome.runtime.getURL('')` threw, `EXTENSION_ORIGIN` was null and the entire `postMessage` forwarding channel died without a peep. Added a warning log so it's at least visible.
+- **Non-cancellable timeout**: the 6-second cleanup timer in the text action handler was fire-and-forget; now it gets pushed into the tracking array so it can be cancelled like the others.
+- **`MAX_IDS`/`KEEP_IDS` re-allocated every tick**: those were inside a `setInterval` callback, redefining the same constants on every run. Moved them out.
+- **Grammar**: "cannot login" → "cannot log in" in `README.md`
+- **Redundant `{ once: false }`**: that's already the default, no need to spell it out.
+
+### Removed
+- All emoji characters from documentation
+- 14 dead exports from `utils/constants.js` (`TEXTAREA_SELECTORS`, `BUTTON_SELECTORS`, `PROCESSED_IDS`, and several unused timeout/validation keys)
+- Redundant CSS properties that were duplicating `display: none`
+- `DEBOUNCE_DELAY` from config — was defined but never referenced anywhere
+
 ## [1.5.0] - 2026-04-28
 
 ### Changed

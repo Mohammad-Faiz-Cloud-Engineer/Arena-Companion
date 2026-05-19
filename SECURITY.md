@@ -97,6 +97,7 @@ Instead, please report security issues via:
 
 | Date       | Version | Auditor        | Result | Notes                           |
 |------------|---------|----------------|--------|---------------------------------|
+| 2026-05-19 | 1.6.0   | Internal       | A+     | Codebase cleanup and hardening  |
 | 2026-04-28 | 1.5.0   | Internal       | A+     | Version synchronization         |
 | 2026-02-07 | 1.4.0   | Internal       | A+     | Enhanced XSS prevention         |
 | 2026-02-07 | 1.3.0   | Internal       | A      | Text action security review     |
@@ -129,6 +130,6 @@ Arena Companion follows:
 - **RFC 5322**: Email validation standard
 ---
 
-**Last Updated**: Apr 28, 2026  
-**Version**: 1.5.0  
+**Last Updated**: May 19, 2026  
+**Version**: 1.6.0  
 **Security Posture**: Reviewed
