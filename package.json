@@ -1,6 +1,6 @@
 {
   "name": "arena-companion",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "description": "Chrome Extension for Arena.AI side panel integration",
   "type": "module",

@@ -3,7 +3,7 @@
  * Centralized configuration for Arena Companion
  * @module constants
  * @author Mohammad Faiz
- * @version 1.6.0
+ * @version 1.7.0
  */
 
 /**

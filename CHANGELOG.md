@@ -5,6 +5,25 @@ All notable changes to Arena Companion will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-06-07
+
+### Added
+- **Test suite**: 78 automated tests using Node.js built-in test runner (zero dependencies) across 3 test files
+  - Code quality tests: console usage, dangerous patterns, Object.freeze, JSDoc, version consistency, import integrity
+  - Consistency tests: SVG sizing, SECURITY.md accuracy, CHANGELOG format, README badges, context menu IDs, prompt templates, storage keys, DNR rules
+  - Regression tests: TDZ declaration order, waitForDocumentReady race condition, accessibility attributes, polling integrity, manifest validity, security patterns
+- **CI pipeline**: GitHub Actions workflow that runs the full test suite on Node.js 22 (LTS) and 24 on every push and pull request to `main`
+
+### Fixed
+- **Race condition**: `waitForDocumentReady` could hang indefinitely if `document.readyState` transitioned to `complete` between the outer check and the `addEventListener` call. Added a `readyState` guard inside the Promise executor.
+- **Temporal Dead Zone**: `log.warn` was called in the `EXTENSION_ORIGIN` catch block before `log` was declared. Reordered `IS_PRODUCTION` and `log` before `EXTENSION_ORIGIN`.
+- **Accessibility**: Loading overlay `aria-describedby` referenced its own child's ID (self-referencing). Replaced with `aria-label="Loading"`.
+- **SVG size mismatch**: Initial SVG attributes in `sidepanel.html` were `18x18` while CSS and JS both used `14x14`. Aligned HTML to `14x14`.
+
+### Changed
+- **Bumped version to 1.7.0** across all modules and docs
+- **SECURITY.md**: Added `1.7.x` to supported versions table and audit history
+
 ## [1.6.0] - 2026-05-19
 
 ### Changed
