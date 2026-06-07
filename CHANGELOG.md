@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CSS property inconsistency**: `content-style.css` only had `display: none` while the JS fallback `injectHidingCSS()` included `visibility: hidden`, `height: 0`, and `overflow: hidden`. Synced `content-style.css` to include all four properties so both sources of truth are identical.
 - **Missing JSDoc**: Added JSDoc to `isValidTabId`, `isValidWindowId`, `sanitizeDownloadFilename` in `service-worker.js`; added `@param` for `windowId` on `broadcastMessage`; added JSDoc to `scheduleLoadTimeout` and improved `cleanup` description in `main.js`.
 - **README inconsistencies**: Merged duplicate Performance and Author sections, added `tests/`, `package.json`, and `.github/workflows/` to the architecture tree, removed non-existent 'dev' suffix from production build instructions, and added a Testing section documenting `npm test` and the three test suites.
+- **README Edge Add-ons note**: Added a note that the Microsoft Edge Add-ons version is stuck at v1.5.0 due to Partner Center publishing errors, directing users to download the extension from GitHub Releases for the latest version.
 
 ## [1.6.0] - 2026-05-19
 
