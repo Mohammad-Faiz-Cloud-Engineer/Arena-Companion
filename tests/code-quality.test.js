@@ -132,7 +132,6 @@ describe('Code Quality', () => {
     for (const moduleFile of MODULE_FILES) {
       it(`${moduleFile} has JSDoc on functions`, () => {
         const content = read(moduleFile);
-        const functionPattern = /(?:const|let|function)\s+(\w+)\s*(?:=|\()/g;
         const jsdocPattern = /\/\*\*[\s\S]*?\*\//g;
         const jsdocBlocks = content.match(jsdocPattern) || [];
         assert.ok(
