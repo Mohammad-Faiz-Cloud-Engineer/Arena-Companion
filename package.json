@@ -1,0 +1,15 @@
+{
+  "name": "arena-companion",
+  "version": "1.6.0",
+  "private": true,
+  "description": "Chrome Extension for Arena.AI side panel integration",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/code-quality.test.js tests/consistency.test.js tests/regression.test.js",
+    "test:quality": "node --test tests/code-quality.test.js",
+    "test:consistency": "node --test tests/consistency.test.js",
+    "test:regression": "node --test tests/regression.test.js"
+  },
+  "author": "Mohammad Faiz",
+  "license": "BSD-2-Clause"
+}
