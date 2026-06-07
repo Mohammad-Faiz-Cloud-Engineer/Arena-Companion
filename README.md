@@ -32,7 +32,9 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 ## Architecture
 
 ```
+├── .github/workflows/          # CI pipeline (GitHub Actions)
 ├── manifest.json              # Extension manifest (v3)
+├── package.json               # Project metadata and test scripts
 ├── rules.json                 # declarativeNetRequest rules
 ├── icons/                     # Extension icons
 ├── background/
@@ -47,6 +49,10 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 │   └── styles/
 │       ├── reset.css          # CSS reset
 │       └── sidepanel.css      # Main styles
+├── tests/
+│   ├── code-quality.test.js   # Code quality checks
+│   ├── consistency.test.js    # Cross-file consistency
+│   └── regression.test.js     # Regression guards
 └── utils/
     ├── constants.js           # Application constants
     ├── logger.js              # Logging utility
@@ -67,9 +73,8 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 ### Production Build
 
 1. Ensure all files are present
-2. Update version in `manifest.json` (remove 'dev' suffix for production)
-3. Zip the entire directory
-4. Upload to Chrome Web Store
+2. Zip the entire directory
+3. Upload to Chrome Web Store
 
 ## Usage
 
@@ -119,7 +124,10 @@ User details and preferences are stored using `chrome.storage.local` with:
 
 - Service Worker architecture for minimal resource usage
 - Lazy loading with visual feedback
-- Optimized CSS with CSS variables
+- Optimized CSS with CSS variables and containment
+- Debounced refresh interaction to prevent reload storms
+- Scoped message delivery to Arena tabs in the active window
+- Cleanup paths for iframe and DOM listeners in the side panel
 - No external dependencies or frameworks
 
 ## Code Quality
@@ -142,20 +150,22 @@ User details and preferences are stored using `chrome.storage.local` with:
 
 - Microsoft Edge users: install from Microsoft Edge Add-ons - [Arena Companion on Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/arena-companion/hfpllffcikhjbhfmiiaacenmegimognh)
 
-## Performance
+## Testing
 
-- Low-overhead background service worker architecture
-- Debounced refresh interaction to prevent accidental reload storms
-- Scoped message delivery to Arena tabs in the active window
-- Cleanup paths for iframe and DOM listeners in the side panel
+Run the full test suite (78 tests, zero dependencies):
+
+```sh
+npm test
+```
+
+Test suites:
+- **Code quality**: console usage, dangerous patterns, Object.freeze, JSDoc, version consistency, import integrity
+- **Consistency**: SVG sizing, SECURITY.md, CHANGELOG, README badges, context menu IDs, prompt templates, storage keys, DNR rules
+- **Regression**: TDZ guards, race conditions, accessibility, polling, manifest, security patterns
 
 ## License
 
 BSD-2-Clause license - See LICENSE file for details
-
-## Author
-
-Created by **Mohammad Faiz**
 
 ## Support
 
