@@ -32,7 +32,7 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 ## Architecture
 
 ```
-├── .github/workflows/          # CI pipeline (GitHub Actions)
+├── .github/workflows/         # CI pipeline (GitHub Actions)
 ├── manifest.json              # Extension manifest (v3)
 ├── package.json               # Project metadata and test scripts
 ├── rules.json                 # declarativeNetRequest rules
