@@ -67,12 +67,28 @@ const sanitizeSelection = (text) => {
   return sanitized.substring(0, CONFIG.VALIDATION.MAX_SELECTION_LENGTH);
 };
 
+/**
+ * Validates that a tab ID is a usable integer
+ * @param {*} tabId - Value to validate
+ * @returns {boolean} Whether the tab ID is valid
+ */
 const isValidTabId = (tabId) =>
   Number.isInteger(tabId) && tabId >= 0 && tabId !== chrome.tabs.TAB_ID_NONE;
 
+/**
+ * Validates that a window ID is a usable integer
+ * @param {*} windowId - Value to validate
+ * @returns {boolean} Whether the window ID is valid
+ */
 const isValidWindowId = (windowId) =>
   Number.isInteger(windowId) && windowId >= 0 && windowId !== chrome.windows.WINDOW_ID_NONE;
 
+/**
+ * Sanitizes a filename for use with chrome.downloads
+ * @param {*} filename - Filename to sanitize
+ * @returns {string|undefined} Sanitized filename or undefined if empty
+ * @throws {Error} If filename is invalid
+ */
 const sanitizeDownloadFilename = (filename) => {
   if (filename === undefined || filename === null || filename === '') {
     return undefined;
@@ -147,6 +163,7 @@ const storePendingAction = async (prompt) => {
 /**
  * Delivers a message to Arena contexts in the active window and the extension runtime
  * @param {Object} message - Message to broadcast
+ * @param {number} [windowId] - Optional window ID to target
  * @returns {Promise<void>}
  */
 const broadcastMessage = async (message, windowId) => {

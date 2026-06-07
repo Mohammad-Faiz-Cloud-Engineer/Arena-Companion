@@ -63,6 +63,9 @@ const hideLoadingOverlay = () => {
   }, CONFIG.TIMEOUTS.OVERLAY_TRANSITION);
 };
 
+/**
+ * Schedules a timeout to auto-hide the loading overlay
+ */
 const scheduleLoadTimeout = () => {
   if (loadTimeout) {
     clearTimeout(loadTimeout);
@@ -392,7 +395,7 @@ const handleVisibilityChange = () => {
 // ============================================================================
 
 /**
- * Cleanup function for event listeners
+ * Cleanup function for event listeners and timers
  */
 const cleanup = () => {
   if (eventController) {

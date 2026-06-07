@@ -123,7 +123,8 @@
     style.textContent = `
       div.bg-surface-floating:has(p),
       div[class*="bg-surface-floating"]:has(svg),
-      div.pointer-events-auto:has(a[href*="lmarena"]) {
+      div.pointer-events-auto:has(a[href*="lmarena"]),
+      div[class*="surface-floating"][class*="pointer-events"] {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
