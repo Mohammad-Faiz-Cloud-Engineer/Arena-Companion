@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bumped version to 1.7.0** across all modules and docs
 - **SECURITY.md**: Added `1.7.x` to supported versions table and audit history
 
+### Fixed (post-release)
+- **CSS fallback selector mismatch**: `injectHidingCSS()` in `content-script.js` was missing the 4th selector (`div[class*="surface-floating"][class*="pointer-events"]`) present in `content-style.css`. If the page stripped the injected style element, the MutationObserver fallback would not hide matching elements. Added the missing selector.
+- **CSS property inconsistency**: `content-style.css` only had `display: none` while the JS fallback `injectHidingCSS()` included `visibility: hidden`, `height: 0`, and `overflow: hidden`. Synced `content-style.css` to include all four properties so both sources of truth are identical.
+- **Missing JSDoc**: Added JSDoc to `isValidTabId`, `isValidWindowId`, `sanitizeDownloadFilename` in `service-worker.js`; added `@param` for `windowId` on `broadcastMessage`; added JSDoc to `scheduleLoadTimeout` and improved `cleanup` description in `main.js`.
+
 ## [1.6.0] - 2026-05-19
 
 ### Changed
