@@ -68,17 +68,8 @@
   let initStartTime = Date.now();
   let isCheckingPendingActions = false;
 
-  const EXTENSION_ORIGIN = (() => {
-    try {
-      return new URL(chrome.runtime.getURL('')).origin;
-    } catch {
-      log.warn('Could not determine extension origin; window message forwarding disabled');
-      return null;
-    }
-  })();
-
   // ============================================================================
-  // LOGGING
+  // LOGGING (must be defined before any code that uses `log`)
   // ============================================================================
 
   const IS_PRODUCTION = (() => {
@@ -108,6 +99,15 @@
       }
     }
   };
+
+  const EXTENSION_ORIGIN = (() => {
+    try {
+      return new URL(chrome.runtime.getURL('')).origin;
+    } catch {
+      log.warn('Could not determine extension origin; window message forwarding disabled');
+      return null;
+    }
+  })();
 
   // ============================================================================
   // CSS INJECTION (Original functionality)
@@ -367,6 +367,10 @@
     }
 
     await new Promise((resolve) => {
+      if (document.readyState === 'complete') {
+        resolve();
+        return;
+      }
       window.addEventListener('load', resolve, { once: true });
     });
   };
