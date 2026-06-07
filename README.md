@@ -150,6 +150,8 @@ User details and preferences are stored using `chrome.storage.local` with:
 
 - Microsoft Edge users: install from Microsoft Edge Add-ons - [Arena Companion on Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/arena-companion/hfpllffcikhjbhfmiiaacenmegimognh)
 
+> **Note:** The Microsoft Edge Add-ons version is currently stuck at **v1.5.0** and does not receive updates. The Microsoft Partner Center throws errors when publishing new versions, preventing updates from going through. For the latest version, download the extension from [GitHub Releases](https://github.com/Mohammad-Faiz-Cloud-Engineer/Arena-Companion/releases), extract the zip file, and install it locally by loading it as an unpacked extension in your browser.
+
 ## Testing
 
 Run the full test suite (78 tests, zero dependencies):
