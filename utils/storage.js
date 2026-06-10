@@ -60,7 +60,7 @@ const sanitizeData = (data, depth = 0, visited = new WeakSet()) => {
     } while (sanitized !== previous);
     do {
       previous = sanitized;
-      sanitized = sanitized.replace(/data:[a-zA-Z]+\/[a-zA-Z0-9.+-]+[,;]/gi, '');
+      sanitized = sanitized.replace(/data:/gi, '');
     } while (sanitized !== previous);
     do {
       previous = sanitized;
