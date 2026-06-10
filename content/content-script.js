@@ -415,6 +415,8 @@
         actionId,
         error,
         timestamp: Date.now()
+      }).catch(() => {
+        // Non-critical; storage polling handles retries
       });
     } catch {
       log.debug('Could not notify background script');
