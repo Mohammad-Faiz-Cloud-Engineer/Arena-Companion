@@ -15,6 +15,7 @@
     "storage",
     "declarativeNetRequest",
     "contextMenus",
+    "downloads",
     "tabs"
   ],
   "host_permissions": [

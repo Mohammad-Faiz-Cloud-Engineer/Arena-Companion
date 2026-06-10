@@ -99,13 +99,13 @@ Instead, please report security issues via:
 
 | Date       | Version | Auditor        | Result | Notes                           |
 |------------|---------|----------------|--------|---------------------------------|
-| 07-06-2026 | 1.7.0   | Internal       | A+     | Code cleanup, permission reduction, Promise fix |
-| 19-05-2026 | 1.6.0   | Internal       | A+     | Codebase cleanup and hardening  |
-| 28-04-2026 | 1.5.0   | Internal       | A+     | Version synchronization         |
-| 07-02-2026 | 1.4.0   | Internal       | A+     | Enhanced XSS prevention         |
-| 07-02-2026 | 1.3.0   | Internal       | A      | Text action security review     |
-| 01-02-2026 | 1.1.0   | Internal       | A+     | Major security update           |
-| 15-01-2026 | 1.0.0   | Internal       | B+     | Initial security implementation |
+| 2026-06-07 | 1.7.0   | Internal       | A+     | Version bump, CI pipeline, test suite |
+| 2026-05-19 | 1.6.0   | Internal       | A+     | Codebase cleanup and hardening  |
+| 2026-04-28 | 1.5.0   | Internal       | A+     | Version synchronization         |
+| 2026-02-07 | 1.4.0   | Internal       | A+     | Enhanced XSS prevention         |
+| 2026-02-07 | 1.3.0   | Internal       | A      | Text action security review     |
+| 2026-02-01 | 1.1.0   | Internal       | A+     | Major security update           |
+| 2026-01-15 | 1.0.0   | Internal       | B+     | Initial security implementation |
 
 ## Known Security Considerations
 
@@ -133,6 +133,6 @@ Arena Companion follows:
 - **RFC 5322**: Email validation standard
 ---
 
-**Last Updated**: 10-06-2026  
+**Last Updated**: June 7, 2026  
 **Version**: 1.7.0  
 **Security Posture**: Reviewed

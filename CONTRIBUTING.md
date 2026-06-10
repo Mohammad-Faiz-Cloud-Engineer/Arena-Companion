@@ -356,4 +356,4 @@ Contributors will be recognized in:
 
 **Thank you for contributing to Arena Companion!**
 
-*Last Updated: 10-06-2026*
+*Last Updated: April 13, 2026*

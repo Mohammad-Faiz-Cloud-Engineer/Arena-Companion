@@ -5,7 +5,7 @@ All notable changes to Arena Companion will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.0] - 07-06-2026
+## [1.7.0] - 2026-06-07
 
 ### Added
 - **Test suite**: 78 automated tests using Node.js built-in test runner (zero dependencies) across 3 test files
@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI pipeline**: GitHub Actions workflow that runs the full test suite on Node.js 22 (LTS) and 24 on every push and pull request to `main`
 
 ### Fixed
-- **Unhandled Promise rejection**: `notifyBackground()` in `content-script.js` could trigger an unhandled rejection when `chrome.runtime.sendMessage()` failed. Added a `.catch()` handler.
 - **Race condition**: `waitForDocumentReady` could hang indefinitely if `document.readyState` transitioned to `complete` between the outer check and the `addEventListener` call. Added a `readyState` guard inside the Promise executor.
 - **Temporal Dead Zone**: `log.warn` was called in the `EXTENSION_ORIGIN` catch block before `log` was declared. Reordered `IS_PRODUCTION` and `log` before `EXTENSION_ORIGIN`.
 - **Accessibility**: Loading overlay `aria-describedby` referenced its own child's ID (self-referencing). Replaced with `aria-label="Loading"`.
@@ -25,16 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bumped version to 1.7.0** across all modules and docs
 - **SECURITY.md**: Added `1.7.x` to supported versions table and audit history
 
-### Removed
-- **Dead code**: Removed 137 lines of unused exports across 6 files
-  - `utils/storage.js`: `clear()`, `getUsage()`, `checkStorageQuota()`
-  - `utils/user-details.js`: `clear()`
-  - `background/service-worker.js`: `sanitizeDownloadFilename()`, GET_USER_DETAILS, SAVE_USER_DETAILS, DOWNLOAD_FILE handlers
-  - `utils/constants.js`: `MAX_DOWNLOAD_FILENAME_LENGTH`
-
-### Security
-- **Permission reduction**: Removed unused `"downloads"` permission from `manifest.json`, reducing extension attack surface (addressed external security audit finding)
-
 ### Fixed (post-release)
 - **CSS fallback selector mismatch**: `injectHidingCSS()` in `content-script.js` was missing the 4th selector (`div[class*="surface-floating"][class*="pointer-events"]`) present in `content-style.css`. If the page stripped the injected style element, the MutationObserver fallback would not hide matching elements. Added the missing selector.
 - **CSS property inconsistency**: `content-style.css` only had `display: none` while the JS fallback `injectHidingCSS()` included `visibility: hidden`, `height: 0`, and `overflow: hidden`. Synced `content-style.css` to include all four properties so both sources of truth are identical.
@@ -42,18 +31,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **README inconsistencies**: Merged duplicate Performance and Author sections, added `tests/`, `package.json`, and `.github/workflows/` to the architecture tree, removed non-existent 'dev' suffix from production build instructions, and added a Testing section documenting `npm test` and the three test suites.
 - **README Edge Add-ons note**: Added a note that the Microsoft Edge Add-ons version is stuck at v1.5.0 due to Partner Center publishing errors, directing users to download the extension from GitHub Releases for the latest version.
 
-## [1.6.0] - 19-05-2026
+## [1.6.0] - 2026-05-19
 
 ### Changed
 - **Bumped version to 1.6.0** across all modules and docs
 - Stripped out emojis, em dashes, and Unicode arrows that had snuck into markdown files
 - Cleaned up `constants.js` by removing 14 unused exports that were dead weight
-- Simplified `content-style.css`  -  `display: none` does the job, the rest was overkill
+- Simplified `content-style.css` — `display: none` does the job, the rest was overkill
 
 ### Fixed
 - **Wrong minimum Chrome version**: bumped from 114 to 116. `chrome.sidePanel.open()` doesn't exist in 114 or 115, so the extension was broken on those versions.
 - **Invalid CSS**: `font-display: swap` on the `body` tag does nothing outside `@font-face`. Removed it.
-- **Regex bug**: stray pipe `|` in the email TLD character class in `logger.js`  -  harmless for redaction but not what was intended.
+- **Regex bug**: stray pipe `|` in the email TLD character class in `logger.js` — harmless for redaction but not what was intended.
 - **Race condition**: hovering the refresh button, then re-entering within 300ms caused a visual flicker because the reset timer was never cleared on re-entry.
 - **Dead code path**: `waitForDocumentReady` had an unreachable `readyState` check inside a Promise executor.
 - **Indentation**: mismatched spacing in `service-worker.js` around the tab validation block.
@@ -67,9 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All emoji characters from documentation
 - 14 dead exports from `utils/constants.js` (`TEXTAREA_SELECTORS`, `BUTTON_SELECTORS`, `PROCESSED_IDS`, and several unused timeout/validation keys)
 - Redundant CSS properties that were duplicating `display: none`
-- `DEBOUNCE_DELAY` from config  -  was defined but never referenced anywhere
+- `DEBOUNCE_DELAY` from config — was defined but never referenced anywhere
 
-## [1.5.0] - 28-04-2026
+## [1.5.0] - 2026-04-28
 
 ### Changed
 - **Version Bump**: Updated version to 1.5.0 across all files
@@ -83,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardened logger and storage sanitization against circular references and inaccurate size checks
 - Corrected documentation links and login guidance to match the current UI behavior
 
-## [1.4.0] - 09-04-2026
+## [1.4.0] - 2026-04-09
 
 ### Changed
 - **Version Bump**: Updated version to 1.4.0 across all files
@@ -96,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Minor bugs and issues
 
-## [1.3.1] - 07-02-2026
+## [1.3.1] - 2026-02-07
 
 ### Security Hardening & Code Quality Update
 
@@ -140,7 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Maintained < 5MB memory footprint
 - Security grade: A+ maintained
 
-## [1.3.0] - 07-02-2026
+## [1.3.0] - 2026-02-07
 
 ### Text Selection Actions - Major Feature Release
 
@@ -187,7 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory-efficient action ID cleanup
 - No memory leaks from polling
 
-## [1.2.0] - 06-02-2026
+## [1.2.0] - 2026-02-06
 
 ### Added
 - **Context Menu Feature**
@@ -204,7 +193,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User accessibility with multiple ways to open the side panel
 - Workflow efficiency with right-click quick access
 
-## [1.1.0] - 01-02-2026
+## [1.1.0] - 2026-02-01
 
 ### Major Performance & Security Update
 
@@ -277,7 +266,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Storage quota validation
 - Error message sanitization
 
-## [1.0.0] - 15-01-2026
+## [1.0.0] - 2026-01-15
 
 ### Initial Release
 

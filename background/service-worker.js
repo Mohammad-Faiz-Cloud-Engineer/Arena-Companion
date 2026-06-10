@@ -84,6 +84,42 @@ const isValidWindowId = (windowId) =>
   Number.isInteger(windowId) && windowId >= 0 && windowId !== chrome.windows.WINDOW_ID_NONE;
 
 /**
+ * Sanitizes a filename for use with chrome.downloads
+ * @param {*} filename - Filename to sanitize
+ * @returns {string|undefined} Sanitized filename or undefined if empty
+ * @throws {Error} If filename is invalid
+ */
+const sanitizeDownloadFilename = (filename) => {
+  if (filename === undefined || filename === null || filename === '') {
+    return undefined;
+  }
+
+  if (typeof filename !== 'string') {
+    throw new Error('Invalid download filename');
+  }
+
+  const normalized = filename
+    .trim()
+    .replace(/[\\]+/g, '/')
+    .replace(/^\/+/, '');
+
+  if (
+    !normalized ||
+    normalized.length > CONFIG.VALIDATION.MAX_DOWNLOAD_FILENAME_LENGTH ||
+    /[\x00-\x1F\x7F]/.test(normalized)
+  ) {
+    throw new Error('Invalid download filename');
+  }
+
+  const segments = normalized.split('/');
+  if (segments.some((segment) => !segment || segment === '.' || segment === '..')) {
+    throw new Error('Invalid download filename');
+  }
+
+  return normalized;
+};
+
+/**
  * Creates a prompt based on the action type
  * @param {string} action - Action type (summarize, explain, rewrite)
  * @param {string} selectedText - User's selected text
@@ -557,6 +593,50 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   (async () => {
     try {
       switch (message.type) {
+        case 'GET_USER_DETAILS': {
+          const details = await userDetails.get();
+          sendResponse({ success: true, data: details });
+          break;
+        }
+
+        case 'SAVE_USER_DETAILS': {
+          await userDetails.save(message.data);
+          sendResponse({ success: true });
+          break;
+        }
+
+        case 'DOWNLOAD_FILE': {
+          try {
+            // Validate URL to prevent arbitrary downloads
+            const downloadUrl = message.url;
+            if (!downloadUrl || typeof downloadUrl !== 'string') {
+              throw new Error('Invalid download URL');
+            }
+            let parsedUrl;
+            try {
+              parsedUrl = new URL(downloadUrl);
+            } catch {
+              throw new Error('Malformed download URL');
+            }
+            if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+              throw new Error('Only HTTP/HTTPS downloads are allowed');
+            }
+            const filename = sanitizeDownloadFilename(message.filename);
+            const saveAs = typeof message.saveAs === 'boolean' ? message.saveAs : false;
+            const downloadId = await chrome.downloads.download({
+              url: downloadUrl,
+              filename,
+              saveAs
+            });
+            logger.info('Download started', { downloadId });
+            sendResponse({ success: true, downloadId });
+          } catch (downloadError) {
+            logger.error('Download failed', downloadError);
+            sendResponse({ success: false, error: downloadError.message });
+          }
+          break;
+        }
+
         case 'PROMPT_INJECTED': {
           logger.info(SUCCESS_MESSAGES.PROMPT_INJECTED, {
             actionId: message.actionId

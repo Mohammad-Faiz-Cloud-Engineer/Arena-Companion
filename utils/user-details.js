@@ -204,5 +204,19 @@ export const userDetails = Object.freeze({
       logger.error('Failed to update last visit', error);
       // Don't throw - this is non-critical
     }
+  },
+
+  /**
+   * Clears user details from storage
+   * @returns {Promise<void>}
+   */
+  async clear() {
+    try {
+      await storage.remove(CONFIG.STORAGE_KEYS.USER_DETAILS);
+      logger.info('User details cleared');
+    } catch (error) {
+      logger.error('Failed to clear user details', error);
+      throw error;
+    }
   }
 });
