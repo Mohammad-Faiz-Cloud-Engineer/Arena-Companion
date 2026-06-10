@@ -17,7 +17,7 @@
   // Must stay in sync with ACTION_STORAGE_KEYS.PENDING_ACTION in utils/constants.js
   const STORAGE_KEY = 'arena_companion_pending_action';
   const POLL_INTERVAL = 300; // 300ms - Balance between responsiveness and CPU usage
-  const INITIAL_POLL_INTERVAL = 100; // 100ms - Aggressive initial polling for fast injection
+  const INITIAL_POLL_INTERVAL = 250; // 250ms - Fast but sustainable; each check takes ~100ms+
   const INITIAL_POLL_DURATION = 10000; // 10s - Duration of fast polling window
   const MAX_TEXTAREA_ATTEMPTS = 15; // Retry attempts for finding textarea
   const ACTION_EXPIRY_MS = 60000; // 60s - Actions older than this are discarded
@@ -530,6 +530,7 @@
 
   let pollIntervalId = null;
   let fastPollIntervalId = null;
+  let cleanupIntervalId = null;
 
   const startPolling = () => {
     // Clear any existing intervals
@@ -537,7 +538,7 @@
     if (fastPollIntervalId) clearInterval(fastPollIntervalId);
 
     // FAST initial polling for first 10 seconds
-    log.info('Starting fast initial polling (100ms) for 10 seconds...');
+    log.info('Starting fast initial polling (250ms) for 10 seconds...');
     fastPollIntervalId = setInterval(async () => {
       const found = await checkPendingActions();
 
@@ -572,6 +573,13 @@
   // ============================================================================
 
   const initialize = () => {
+    // Guard against duplicate injection (extension reload, SPA navigation)
+    // Uses DOM element which persists across isolated world recreations
+    if (document.getElementById(STYLE_ID)) {
+      log.debug('Already initialized, skipping duplicate injection');
+      return;
+    }
+
     log.info('Content script initializing v1.7.0 on:', window.location.href);
 
     // Store init time
@@ -613,7 +621,7 @@
   const KEEP_IDS = 50;
 
   // Clean up processed action IDs periodically to prevent memory leaks
-  setInterval(() => {
+  cleanupIntervalId = setInterval(() => {
     if (processedActionIds.size > MAX_IDS) {
       const idsToKeep = Array.from(processedActionIds).slice(-KEEP_IDS);
       processedActionIds.clear();
@@ -621,4 +629,11 @@
       log.debug('Cleaned up processed action IDs');
     }
   }, ID_CLEANUP_INTERVAL);
+
+  // Clear all intervals on page unload to prevent resource leaks
+  window.addEventListener('beforeunload', () => {
+    if (pollIntervalId) clearInterval(pollIntervalId);
+    if (fastPollIntervalId) clearInterval(fastPollIntervalId);
+    if (cleanupIntervalId) clearInterval(cleanupIntervalId);
+  }, { once: true });
 })();
