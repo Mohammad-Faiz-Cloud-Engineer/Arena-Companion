@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.8.0] - 10/06/2026
 
 ### Fixed
-- **Duplicate content script execution**: Chrome MV3 can re-inject content scripts on extension reload or SPA navigation, stacking duplicate intervals, listeners, and MutationObservers. Added a DOM-based guard in `initialize()` using `document.getElementById(STYLE_ID)` — the DOM persists across Chrome's isolated world recreations, unlike `window` properties which are destroyed on each re-injection.
-- **Overly aggressive fast polling**: `INITIAL_POLL_INTERVAL` was 100ms but each `checkPendingActions()` call takes ~500ms+ (storage read, validation, 500ms await). Most callbacks hit the `isCheckingPendingActions` re-entry lock and returned instantly, wasting CPU. Increased to 250ms — still faster than the 300ms normal poll, with 60% fewer wasted callbacks.
+- **Duplicate content script execution**: Chrome MV3 can re-inject content scripts on extension reload or SPA navigation, stacking duplicate intervals, listeners, and MutationObservers. Added a DOM-based guard in `initialize()` using `document.getElementById(STYLE_ID)`, the DOM persists across Chrome's isolated world recreations, unlike `window` properties which are destroyed on each re-injection.
+- **Overly aggressive fast polling**: `INITIAL_POLL_INTERVAL` was 100ms but each `checkPendingActions()` call takes ~500ms+ (storage read, validation, 500ms await). Most callbacks hit the `isCheckingPendingActions` re-entry lock and returned instantly, wasting CPU. Increased to 250ms, still faster than the 300ms normal poll, with 60% fewer wasted callbacks.
 - **Uncleared cleanup interval**: The `setInterval` for processed action ID cleanup had its return value discarded, making it impossible to clear. Now stored in `cleanupIntervalId` and all intervals (poll, fast poll, cleanup) are cleared in a `beforeunload` handler to prevent resource leaks.
 - **Data corruption in sanitization regex**: The `/data:/gi` pattern in `storage.js` and `user-details.js` stripped the literal text "data:" from any user input, corrupting legitimate text like "My data: notes, etc". Replaced with `/data:[a-zA-Z]+\/[a-zA-Z0-9.+-]+[,;]/gi` which requires the `type/subtype` MIME structure that all valid data URIs have per RFC 2397, eliminating false positives while still blocking `data:` URI XSS vectors.
 
@@ -45,12 +45,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bumped version to 1.6.0** across all modules and docs
 - Stripped out emojis, em dashes, and Unicode arrows that had snuck into markdown files
 - Cleaned up `constants.js` by removing 14 unused exports that were dead weight
-- Simplified `content-style.css` — `display: none` does the job, the rest was overkill
+- Simplified `content-style.css`, `display: none` does the job, the rest was overkill
 
 ### Fixed
 - **Wrong minimum Chrome version**: bumped from 114 to 116. `chrome.sidePanel.open()` doesn't exist in 114 or 115, so the extension was broken on those versions.
 - **Invalid CSS**: `font-display: swap` on the `body` tag does nothing outside `@font-face`. Removed it.
-- **Regex bug**: stray pipe `|` in the email TLD character class in `logger.js` — harmless for redaction but not what was intended.
+- **Regex bug**: stray pipe `|` in the email TLD character class in `logger.js`, harmless for redaction but not what was intended.
 - **Race condition**: hovering the refresh button, then re-entering within 300ms caused a visual flicker because the reset timer was never cleared on re-entry.
 - **Dead code path**: `waitForDocumentReady` had an unreachable `readyState` check inside a Promise executor.
 - **Indentation**: mismatched spacing in `service-worker.js` around the tab validation block.
@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All emoji characters from documentation
 - 14 dead exports from `utils/constants.js` (`TEXTAREA_SELECTORS`, `BUTTON_SELECTORS`, `PROCESSED_IDS`, and several unused timeout/validation keys)
 - Redundant CSS properties that were duplicating `display: none`
-- `DEBOUNCE_DELAY` from config — was defined but never referenced anywhere
+- `DEBOUNCE_DELAY` from config, was defined but never referenced anywhere
 
 ## [1.5.0] - 28/04/2026
 
