@@ -5,15 +5,7 @@ All notable changes to Arena Companion will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.0] - 10/06/2026
-
-### Fixed
-- **Duplicate content script execution**: Chrome MV3 can re-inject content scripts on extension reload or SPA navigation, stacking duplicate intervals, listeners, and MutationObservers. Added a DOM-based guard in `initialize()` using `document.getElementById(STYLE_ID)`, the DOM persists across Chrome's isolated world recreations, unlike `window` properties which are destroyed on each re-injection.
-- **Overly aggressive fast polling**: `INITIAL_POLL_INTERVAL` was 100ms but each `checkPendingActions()` call takes ~500ms+ (storage read, validation, 500ms await). Most callbacks hit the `isCheckingPendingActions` re-entry lock and returned instantly, wasting CPU. Increased to 250ms, still faster than the 300ms normal poll, with 60% fewer wasted callbacks.
-- **Uncleared cleanup interval**: The `setInterval` for processed action ID cleanup had its return value discarded, making it impossible to clear. Now stored in `cleanupIntervalId` and all intervals (poll, fast poll, cleanup) are cleared in a `beforeunload` handler to prevent resource leaks.
-- **Data corruption in sanitization regex**: The `/data:/gi` pattern in `storage.js` and `user-details.js` stripped the literal text "data:" from any user input, corrupting legitimate text like "My data: notes, etc". Replaced with `/data:[a-zA-Z]+\/[a-zA-Z0-9.+-]+[,;]/gi` which requires the `type/subtype` MIME structure that all valid data URIs have per RFC 2397, eliminating false positives while still blocking `data:` URI XSS vectors.
-
-## [1.7.0] - 07/06/2026
+## [1.7.0] - 2026-06-07
 
 ### Added
 - **Test suite**: 78 automated tests using Node.js built-in test runner (zero dependencies) across 3 test files
@@ -39,18 +31,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **README inconsistencies**: Merged duplicate Performance and Author sections, added `tests/`, `package.json`, and `.github/workflows/` to the architecture tree, removed non-existent 'dev' suffix from production build instructions, and added a Testing section documenting `npm test` and the three test suites.
 - **README Edge Add-ons note**: Added a note that the Microsoft Edge Add-ons version is stuck at v1.5.0 due to Partner Center publishing errors, directing users to download the extension from GitHub Releases for the latest version.
 
-## [1.6.0] - 19/05/2026
+## [1.6.0] - 2026-05-19
 
 ### Changed
 - **Bumped version to 1.6.0** across all modules and docs
 - Stripped out emojis, em dashes, and Unicode arrows that had snuck into markdown files
 - Cleaned up `constants.js` by removing 14 unused exports that were dead weight
-- Simplified `content-style.css`, `display: none` does the job, the rest was overkill
+- Simplified `content-style.css` — `display: none` does the job, the rest was overkill
 
 ### Fixed
 - **Wrong minimum Chrome version**: bumped from 114 to 116. `chrome.sidePanel.open()` doesn't exist in 114 or 115, so the extension was broken on those versions.
 - **Invalid CSS**: `font-display: swap` on the `body` tag does nothing outside `@font-face`. Removed it.
-- **Regex bug**: stray pipe `|` in the email TLD character class in `logger.js`, harmless for redaction but not what was intended.
+- **Regex bug**: stray pipe `|` in the email TLD character class in `logger.js` — harmless for redaction but not what was intended.
 - **Race condition**: hovering the refresh button, then re-entering within 300ms caused a visual flicker because the reset timer was never cleared on re-entry.
 - **Dead code path**: `waitForDocumentReady` had an unreachable `readyState` check inside a Promise executor.
 - **Indentation**: mismatched spacing in `service-worker.js` around the tab validation block.
@@ -64,9 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All emoji characters from documentation
 - 14 dead exports from `utils/constants.js` (`TEXTAREA_SELECTORS`, `BUTTON_SELECTORS`, `PROCESSED_IDS`, and several unused timeout/validation keys)
 - Redundant CSS properties that were duplicating `display: none`
-- `DEBOUNCE_DELAY` from config, was defined but never referenced anywhere
+- `DEBOUNCE_DELAY` from config — was defined but never referenced anywhere
 
-## [1.5.0] - 28/04/2026
+## [1.5.0] - 2026-04-28
 
 ### Changed
 - **Version Bump**: Updated version to 1.5.0 across all files
@@ -80,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardened logger and storage sanitization against circular references and inaccurate size checks
 - Corrected documentation links and login guidance to match the current UI behavior
 
-## [1.4.0] - 09/04/2026
+## [1.4.0] - 2026-04-09
 
 ### Changed
 - **Version Bump**: Updated version to 1.4.0 across all files
@@ -93,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Minor bugs and issues
 
-## [1.3.1] - 07/02/2026
+## [1.3.1] - 2026-02-07
 
 ### Security Hardening & Code Quality Update
 
@@ -137,7 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Maintained < 5MB memory footprint
 - Security grade: A+ maintained
 
-## [1.3.0] - 07/02/2026
+## [1.3.0] - 2026-02-07
 
 ### Text Selection Actions - Major Feature Release
 
@@ -184,7 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory-efficient action ID cleanup
 - No memory leaks from polling
 
-## [1.2.0] - 06/02/2026
+## [1.2.0] - 2026-02-06
 
 ### Added
 - **Context Menu Feature**
@@ -201,7 +193,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User accessibility with multiple ways to open the side panel
 - Workflow efficiency with right-click quick access
 
-## [1.1.0] - 01/02/2026
+## [1.1.0] - 2026-02-01
 
 ### Major Performance & Security Update
 
@@ -274,7 +266,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Storage quota validation
 - Error message sanitization
 
-## [1.0.0] - 15/01/2026
+## [1.0.0] - 2026-01-15
 
 ### Initial Release
 
