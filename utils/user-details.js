@@ -94,7 +94,7 @@ const sanitizeInput = (input, maxLength) => {
   } while (sanitized !== previous);
   do {
     previous = sanitized;
-    sanitized = sanitized.replace(/data:/gi, '');
+    sanitized = sanitized.replace(/data:[a-zA-Z]+\/[a-zA-Z0-9.+-]+[,;]/gi, '');
   } while (sanitized !== previous);
   do {
     previous = sanitized;
