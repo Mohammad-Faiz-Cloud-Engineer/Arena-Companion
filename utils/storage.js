@@ -156,26 +156,6 @@ const validateData = (data) => {
   }
 };
 
-/**
- * Checks available storage quota
- * @returns {Promise<{usage: number, quota: number}>} Storage usage info
- */
-const checkStorageQuota = async () => {
-  try {
-    if (navigator.storage && navigator.storage.estimate) {
-      const estimate = await navigator.storage.estimate();
-      return {
-        usage: estimate.usage || 0,
-        quota: estimate.quota || 0
-      };
-    }
-    return { usage: 0, quota: 0 };
-  } catch (error) {
-    logger.debug('Storage quota check failed', error);
-    return { usage: 0, quota: 0 };
-  }
-};
-
 export const storage = Object.freeze({
   /**
    * Retrieves data from chrome.storage.local
@@ -244,27 +224,5 @@ export const storage = Object.freeze({
       logger.error('Failed to remove from storage', error);
       throw error;
     }
-  },
-
-  /**
-   * Clears all data from chrome.storage.local
-   * @returns {Promise<void>}
-   */
-  async clear() {
-    try {
-      await chrome.storage.local.clear();
-      logger.info('Storage cleared');
-    } catch (error) {
-      logger.error('Failed to clear storage', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Gets storage usage statistics
-   * @returns {Promise<{usage: number, quota: number}>} Storage usage info
-   */
-  async getUsage() {
-    return checkStorageQuota();
   }
 });
