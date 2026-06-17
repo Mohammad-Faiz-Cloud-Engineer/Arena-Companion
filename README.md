@@ -32,11 +32,56 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 ## Architecture
 
 ```
-├── .github/workflows/         # CI pipeline (GitHub Actions)
+┌─────────────────────────────────────────────────────┐
+│                  Chrome Browser                      │
+│  ┌─────────────────────────────────────────────┐    │
+│  │         Service Worker (background)          │    │
+│  │  - Context menus (6 items)                   │    │
+│  │  - Side panel open (3-method cascade)        │    │
+│  │  - Text action workflow (store+broadcast)    │    │
+│  │  - Message routing (CRUD, downloads)         │    │
+│  │  - UUID generation (3 fallback strategies)   │    │
+│  └──────────┬──────────────────────────────────┘    │
+│             │ chrome.runtime.sendMessage             │
+│  ┌──────────▼──────────┐  ┌──────────────────────┐  │
+│  │  Content Script     │  │   Side Panel (HTML)  │  │
+│  │  - CSS injection    │  │  - Iframe (arena.ai) │  │
+│  │  - Prompt injection │  │  - Refresh button    │  │
+│  │  - Storage polling  │  │  - Loading overlay   │  │
+│  │  - Message handling │  │  - Hover→redirect    │  │
+│  │  - React/Gradio     │  │  - Prompt forwarding │  │
+│  │    compatibility    │  │  - Visibility detect │  │
+│  └─────────────────────┘  └──────────────────────┘  │
+│             │                                        │
+│  ┌──────────▼──────────────────────────────────┐    │
+│  │           Utilities Layer                    │    │
+│  │  constants.js │ logger.js │ storage.js │    │    │
+│  │  user-details.js                              │    │
+│  └──────────────────────────────────────────────┘    │
+│             │                                        │
+│  ┌──────────▼──────────────────────────────────┐    │
+│  │  DNR Rules (rules.json)                     │    │
+│  │  - Strips X-Frame-Options, CSP, Frame-Options│   │
+│  │  - Scoped to arena.ai subframes             │    │
+│  └──────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────┘
+```
+
+### File Structure
+
+```
+├── .github/workflows/
+│   ├── ci.yml                 # CI pipeline (GitHub Actions)
+│   └── codeql.yml             # CodeQL security analysis
 ├── manifest.json              # Extension manifest (v3)
 ├── package.json               # Project metadata and test scripts
 ├── rules.json                 # declarativeNetRequest rules
-├── icons/                     # Extension icons
+├── icons/
+│   └── png/
+│       ├── icon16.png
+│       ├── icon32.png
+│       ├── icon48.png
+│       └── icon128.png
 ├── background/
 │   └── service-worker.js      # Background service worker
 ├── content/
