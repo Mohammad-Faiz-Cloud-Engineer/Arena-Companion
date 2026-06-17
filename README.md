@@ -32,39 +32,39 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────┐
 │                  Chrome Browser                      │
-│  ┌─────────────────────────────────────────────┐    │
+│  ┌──────────────────────────────────────────────┐    │
 │  │         Service Worker (background)          │    │
 │  │  - Context menus (6 items)                   │    │
 │  │  - Side panel open (3-method cascade)        │    │
 │  │  - Text action workflow (store+broadcast)    │    │
 │  │  - Message routing (CRUD, downloads)         │    │
 │  │  - UUID generation (3 fallback strategies)   │    │
-│  └──────────┬──────────────────────────────────┘    │
+│  └──────────┬───────────────────────────────────┘    │
 │             │ chrome.runtime.sendMessage             │
-│  ┌──────────▼──────────┐  ┌──────────────────────┐  │
-│  │  Content Script     │  │   Side Panel (HTML)  │  │
-│  │  - CSS injection    │  │  - Iframe (arena.ai) │  │
-│  │  - Prompt injection │  │  - Refresh button    │  │
-│  │  - Storage polling  │  │  - Loading overlay   │  │
-│  │  - Message handling │  │  - Hover→redirect    │  │
-│  │  - React/Gradio     │  │  - Prompt forwarding │  │
-│  │    compatibility    │  │  - Visibility detect │  │
-│  └─────────────────────┘  └──────────────────────┘  │
+│  ┌──────────▼──────────┐  ┌──────────────────────┐   │
+│  │  Content Script     │  │   Side Panel (HTML)  │   │
+│  │  - CSS injection    │  │  - Iframe (arena.ai) │   │
+│  │  - Prompt injection │  │  - Refresh button    │   │
+│  │  - Storage polling  │  │  - Loading overlay   │   │
+│  │  - Message handling │  │  - Hover→redirect    │   │
+│  │  - React/Gradio     │  │  - Prompt forwarding │   │
+│  │    compatibility    │  │  - Visibility detect │   │
+│  └─────────────────────┘  └──────────────────────┘   │
 │             │                                        │
-│  ┌──────────▼──────────────────────────────────┐    │
-│  │           Utilities Layer                    │    │
-│  │  constants.js │ logger.js │ storage.js │    │    │
-│  │  user-details.js                              │    │
-│  └──────────────────────────────────────────────┘    │
+│  ┌──────────▼──────────────────────────────────┐     │
+│  │           Utilities Layer                   │     │
+│  │  constants.js │ logger.js │ storage.js │    │     │
+│  │  user-details.js                            │     │
+│  └─────────────────────────────────────────────┘     │
 │             │                                        │
-│  ┌──────────▼──────────────────────────────────┐    │
-│  │  DNR Rules (rules.json)                     │    │
-│  │  - Strips X-Frame-Options, CSP, Frame-Options│   │
-│  │  - Scoped to arena.ai subframes             │    │
+│  ┌──────────▼───────────────────────────────────┐    │
+│  │  DNR Rules (rules.json)                      │    │
+│  │  - Strips X-Frame-Options, CSP, Frame-Options│    │
+│  │  - Scoped to arena.ai subframes              │    │
 │  └──────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────┘
 ```
 
 ### File Structure
