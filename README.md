@@ -31,7 +31,7 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 
 ## Architecture
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │                  Chrome Browser                      │
 │  ┌──────────────────────────────────────────────┐    │
@@ -69,7 +69,7 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 
 ### File Structure
 
-```
+```text
 ├── .github/workflows/
 │   ├── ci.yml                 # CI pipeline (GitHub Actions)
 │   └── codeql.yml             # CodeQL security analysis
@@ -133,6 +133,7 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 **Important:** Due to OAuth security restrictions, you cannot log in directly within the extension's iframe.
 
 **Login Steps:**
+
 1. Open [https://arena.ai/](https://arena.ai/) in a regular browser tab
 2. Complete the login process (Google OAuth or other method)
 3. Once logged in on the website, return to the extension
@@ -140,6 +141,7 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 5. You will now be logged in within the extension
 
 **Why this approach?**
+
 - Google OAuth and most authentication providers block iframe embedding for security reasons
 - This is a standard security measure to prevent clickjacking attacks
 - Your login session is shared between the website and the extension once authenticated
@@ -151,6 +153,7 @@ A Chrome Extension for seamless [Arena.AI](https://arena.ai/) integration in you
 ### Header Stripping
 
 The extension uses `declarativeNetRequest` to remove frame-blocking headers from Arena subframes loaded inside the extension:
+
 - `X-Frame-Options`
 - `Content-Security-Policy`
 - `Frame-Options`
@@ -160,6 +163,7 @@ This rule is limited to `arena.ai` subframes so the direct website keeps its nor
 ### Storage Management
 
 User details and preferences are stored using `chrome.storage.local` with:
+
 - Professional error handling
 - Validation before storage operations
 - Sensible length limits
@@ -206,6 +210,7 @@ npm test
 ```
 
 Test suites:
+
 - **Code quality**: console usage, dangerous patterns, Object.freeze, JSDoc, version consistency, import integrity
 - **Consistency**: SVG sizing, SECURITY.md, CHANGELOG, README badges, context menu IDs, prompt templates, storage keys, DNR rules
 - **Regression**: TDZ guards, race conditions, accessibility, polling, manifest, security patterns

@@ -3,12 +3,14 @@
 ## Getting Started
 
 ### Installation
+
 1. Load extension in Chrome (`chrome://extensions/`)
 2. Enable "Developer mode"
 3. Click "Load unpacked"
 4. Select the Arena Companion folder
 
 ### First Time Setup
+
 1. Click the extension icon in Chrome toolbar
 2. Side panel opens with Arena.AI
 
@@ -17,11 +19,12 @@
 ## How to Login (Important!)
 
 ### Cannot Login Directly in Extension
+
 Due to security restrictions, you **cannot** login directly within the extension's iframe.
 
 ### Simple 3-Step Login Process
 
-```
+```text
 Step 1: Open https://arena.ai/ in a new tab
    v
 Step 2: Login on the website (Google OAuth)
@@ -31,18 +34,21 @@ Step 3: Return to extension -> Click refresh button
 You're logged in!
 ```
 
-### Detailed Steps:
+### Detailed Steps
 
-**1. Open Website**
+#### 1. Open Website
+
 - Open new browser tab
-- Go to: **https://arena.ai/**
+- Go to: [https://arena.ai/](https://arena.ai/)
 
-**2. Complete Login**
+#### 2. Complete Login
+
 - Click login/sign-in on website
 - Complete Google OAuth
 - Verify you're logged in
 
-**3. Sync Extension**
+#### 3. Sync Extension
+
 - Return to Arena Companion side panel
 - Click the **refresh button** (top-right corner)
 - Extension now shows you logged in!
@@ -52,11 +58,13 @@ You're logged in!
 ## Quick Tips
 
 ### Using the Extension
+
 - **Refresh Button:** Reload Arena.AI interface
-- **Login Flow:** Open https://arena.ai/ in a regular tab first, then return and refresh
+- **Login Flow:** Open [https://arena.ai/](https://arena.ai/) in a regular tab first, then return and refresh
 - **Side Panel:** Persists across tabs and windows
 
 ### Why This Login Method?
+
 - **Security:** Prevents clickjacking attacks
 - **OAuth Compliance:** Follows Google's security requirements
 - **Session Sharing:** Chrome shares cookies between website and extension
@@ -67,15 +75,18 @@ You're logged in!
 ## Troubleshooting
 
 ### Not Logged In After Refresh?
-- Verify you logged in at **https://arena.ai/** (exact URL)
+
+- Verify you logged in at [https://arena.ai/](https://arena.ai/) (exact URL)
 - Clear browser cache and try again
 - Check cookies are enabled
 
 ### Need a Fresh Login Tab?
-- Open https://arena.ai/ manually in a regular browser tab
+
+- Open [https://arena.ai/](https://arena.ai/) manually in a regular browser tab
 - Reload extension from `chrome://extensions/`
 
 ### "Content is Blocked" Error?
+
 - This is expected when trying to login in iframe
 - Follow the 3-step process above instead
 
@@ -92,16 +103,17 @@ You're logged in!
 ## Quick Reference
 
 | Action | How To |
-|--------|--------|
+| :--- | :--- |
 | Open Extension | Click extension icon in toolbar |
 | Refresh | Click refresh button (top-right) |
-| Login | Login at https://arena.ai/ first, then refresh |
+| Login | Login at [https://arena.ai/](https://arena.ai/) first, then refresh |
 
 ---
 
-## You're All Set!
+## You're All Set
 
 Once logged in, your session persists across:
+
 - Browser tabs
 - Browser windows  
 - Browser restarts (until you logout)

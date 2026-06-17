@@ -177,7 +177,7 @@ button {
 
 ### Commit Message Format
 
-```
+```text
 <type>(<scope>): <subject>
 
 <body>
@@ -232,11 +232,12 @@ changes
 
 ### PR Title Format
 
-```
+```text
 [Type] Brief description of changes
 ```
 
 Examples:
+
 - `[Feature] Add text summarization context menu`
 - `[Fix] Resolve storage quota exceeded error`
 - `[Security] Enhance XSS prevention in sanitization`
@@ -299,6 +300,7 @@ Closes #123
 ### Browser Testing
 
 Test in:
+
 - Chrome 116+
 - Microsoft Edge 116+
 - Other Chromium-based browsers (optional)
@@ -334,6 +336,7 @@ Test in:
 ### Security Review
 
 All PRs with security implications will undergo additional review. Please:
+
 - Highlight security-related changes
 - Explain security considerations
 - Provide testing evidence
@@ -348,6 +351,7 @@ All PRs with security implications will undergo additional review. Please:
 ## Recognition
 
 Contributors will be recognized in:
+
 - CHANGELOG.md (for significant contributions)
 - README.md (for major features)
 - GitHub contributors page
@@ -356,4 +360,4 @@ Contributors will be recognized in:
 
 **Thank you for contributing to Arena Companion!**
 
-*Last Updated: April 13, 2026*
+Last Updated: Jun 17, 2026
