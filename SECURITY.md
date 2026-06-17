@@ -145,6 +145,6 @@ Arena Companion follows:
 
 ---
 
-**Last Updated**: June 7, 2026  
+**Last Updated**: Jun 17, 2026  
 **Version**: 1.7.0  
 **Security Posture**: Reviewed
