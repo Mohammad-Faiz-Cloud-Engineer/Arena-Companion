@@ -405,54 +405,60 @@ const handleTextAction = async (action, selectedText, tabInfo) => {
 const createContextMenus = () => {
   try {
     chrome.contextMenus.removeAll(() => {
-      // Menu 1: Open Arena Companion (always visible)
-      chrome.contextMenus.create({
+      const createMenuItem = (properties) => {
+        try {
+          const result = chrome.contextMenus.create(properties);
+          if (result && typeof result.catch === 'function') {
+            result.catch((error) => {
+              logger.error('Failed to create context menu item', { id: properties.id, error: error.message });
+            });
+          }
+        } catch (error) {
+          logger.error('Failed to create context menu item', { id: properties.id, error: error.message });
+        }
+      };
+
+      createMenuItem({
         id: CONTEXT_MENU_IDS.OPEN_COMPANION,
         title: 'Open Arena Companion',
         contexts: ['all']
       });
 
-      // Menu 2: Arena Tools (parent - only when text selected)
-      chrome.contextMenus.create({
+      createMenuItem({
         id: CONTEXT_MENU_IDS.ARENA_TOOLS,
         title: 'Arena Tools',
         contexts: ['selection']
       });
 
-      // Child: Summarize
-      chrome.contextMenus.create({
+      createMenuItem({
         id: CONTEXT_MENU_IDS.SUMMARIZE,
         parentId: CONTEXT_MENU_IDS.ARENA_TOOLS,
         title: 'Summarize',
         contexts: ['selection']
       });
 
-      // Child: Explain
-      chrome.contextMenus.create({
+      createMenuItem({
         id: CONTEXT_MENU_IDS.EXPLAIN,
         parentId: CONTEXT_MENU_IDS.ARENA_TOOLS,
         title: 'Explain',
         contexts: ['selection']
       });
 
-      // Child: Rewrite
-      chrome.contextMenus.create({
+      createMenuItem({
         id: CONTEXT_MENU_IDS.REWRITE,
         parentId: CONTEXT_MENU_IDS.ARENA_TOOLS,
         title: 'Rewrite',
         contexts: ['selection']
       });
 
-      // Child: Quiz Me
-      chrome.contextMenus.create({
+      createMenuItem({
         id: CONTEXT_MENU_IDS.QUIZ_ME,
         parentId: CONTEXT_MENU_IDS.ARENA_TOOLS,
         title: 'Quiz Me',
         contexts: ['selection']
       });
 
-      // Child: Proofread
-      chrome.contextMenus.create({
+      createMenuItem({
         id: CONTEXT_MENU_IDS.PROOFREAD,
         parentId: CONTEXT_MENU_IDS.ARENA_TOOLS,
         title: 'Proofread',
@@ -495,8 +501,6 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       const version = chrome.runtime.getManifest().version;
       logger.info(`Extension updated to version ${version}`);
     }
-
-    createContextMenus();
   } catch (error) {
     logger.error('Installation handler error', error);
   }

@@ -228,7 +228,7 @@ describe('Cross-File Consistency', () => {
 
     it('rules strip frame-blocking headers for arena.ai', () => {
       const rules = JSON.parse(read('rules.json'));
-      const headersToStrip = ['X-Frame-Options', 'Content-Security-Policy'];
+      const headersToStrip = ['X-Frame-Options', 'Content-Security-Policy', 'Frame-Options'];
 
       for (const rule of rules) {
         const responseHeaders = rule.action?.responseHeaders || [];
